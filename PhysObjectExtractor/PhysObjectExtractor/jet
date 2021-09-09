@@ -1,0 +1,7 @@
+----- Begin Fatal Exception 27-Aug-2021 15:53:35 CEST-----------------------
+An exception of category 'ConfigFileReadError' occurred while
+   [0] Processing the python configuration file named python/poet_cfg.py
+Exception Message:
+python encountered the error: <type 'exceptions.NameError'>
+name 'Analyzsis' is not defined
+----- End Fatal Exception -------------------------------------------------
