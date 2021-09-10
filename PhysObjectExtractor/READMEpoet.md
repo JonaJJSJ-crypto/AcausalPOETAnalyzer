@@ -1,7 +1,6 @@
-# AcausalPOETAnalyzer
- This repository is based on Physics Object Extractor Tool from [cms-legacydata-analyses](https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool) last updated in 2-September-2021.
+# Physics Objects Extractor (PhysObjectExtractor)
 
- ## Description
+## Description
 
 The `PhysObjectExtractor` package is the heart of the POET repository.  It contains a collection of [EDAnalyzers](https://cms-opendata-guide.web.cern.ch/cmssw/cmsswanalyzers/) that extract information of different physics objects into a [ROOT](https://cms-opendata-guide.web.cern.ch/tools/root/) file called `myoutput.root`.  They have been written separately for clarity and can be executed modularly using a single configuration file called `poet_cfg.py`.
 
@@ -72,3 +71,6 @@ cmsRun poet_cfg.py <isData> <doPat>
 
 
 The result will be a `myoutput.root` file with simple variables.  The information in this file is organized in `ROOT` directories corresponding to each type of physics object (or kind of information).  In order to further analyze the data in these file, the analysis templates in the `test` folder may be used.
+
+
+
