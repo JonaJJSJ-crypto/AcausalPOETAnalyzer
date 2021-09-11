@@ -20,5 +20,6 @@ The scripts in this package are designed to run for HTCondor using continerized 
 The `submit_jobs.sh` is the steering file.  This script loops over all the possible datasets to be simulated, creates the *jobs* using the `create_job.py` script and submits them to the Condor cluster.  The python script, `create_job.py` takes care of configuring the `job.sh` correctly so it can trigger a correct template for each mass point simulation.
 
 Certain parameters in the headers of these scripts can be changed according to needs.
- 
+
+Finally, a `checkFiles.py` script is used to check for the availability of the resulting ROOT files of the simulation.  If some files are missing one can resend that specific job by hand. 
 
