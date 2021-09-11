@@ -350,10 +350,10 @@ if(!isData){
 	     cout<<"genpt: "<<dit.pt()<<" Zd#: "<<dit.numberOfDaughters()<<endl;
 	  }
 
-          /*if(dit->pdgId()!=23){
+          if(dit->pdgId()!=23){
                 cout<<"pdg hija Z: "<<dit->pdgId()<<" ptd: "<<dit->pt()<<endl;
 
-          /*}
+          }
           else{
                	Candidate * dit = dit.daugther(k);
           }
@@ -495,12 +495,12 @@ if(!isData){
   float yerr;
   float zerr;
 
-//iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf 
+//iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
 float saveDR=100;
 int identyTrack[myelectrons->size()];
 int k=0;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
-{ 
+{
  if(itElec1->pt()>20)
  {
   int j=0;
@@ -523,7 +523,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
  }
  k++;
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
-}  
+}
 //fin identifier
 
 vector<float> savedisp (myelectrons->size());
@@ -566,9 +566,9 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        if(myVertex.isValid()){
 	for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 	{
-             numsecvec++;//total of secondary vertex disp per event 
-	     k++;//# of saved disp per SecondaryVertex 
-         
+             numsecvec++;//total of secondary vertex disp per event
+	     k++;//# of saved disp per SecondaryVertex
+
 	     //primaryvertex
 	     //cout<<"ptE: "<<itElec1->pt()<<endl;
              //cout<<"pvx: "<< itElec1->vx()<<" pvy: "<<itElec1->vy()<<" pvz: "<< itElec1->vz()<<endl;
@@ -630,7 +630,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
      j++;
     }
     i++;
- }//finalde if pt track 
+ }//finalde if pt track
     electron_secN.push_back(i);
 }//fin for Track1
 }// Final de Is ValidElectron
