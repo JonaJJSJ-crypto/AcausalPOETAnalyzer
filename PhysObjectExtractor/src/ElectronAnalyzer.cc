@@ -75,6 +75,7 @@ private:
   TTree *mtree;
   int numelectron; //number of electrons in the event
   int numsecvec;  //number of secondary vertex disp in the event
+  int numdisp;  //tool for finding best match for electrons
   std::vector<float> electron_e;
   std::vector<float> electron_pt;
   std::vector<float> electron_px;
@@ -91,6 +92,12 @@ private:
   std::vector<float> electron_dz;
   std::vector<float> electron_dxyError;
   std::vector<float> electron_dzError;
+  std::vector<float> secvec_posx;
+  std::vector<float> secvec_posy;
+  std::vector<float> secvec_posz;
+  std::vector<float> secvec_poserrorx;
+  std::vector<float> secvec_poserrory;
+  std::vector<float> secvec_poserrorz;
   std::vector<float> secvec_disp;
   std::vector<float> secvec_dispR;
   std::vector<float> secvec_deltaR;
@@ -163,6 +170,18 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
   mtree->Branch("electron_dzError",&electron_dzError);
   mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
+  mtree->Branch("secvec_posx",&secvec_posx);
+  mtree->GetBranch("secvec_posx")->SetTitle("secvec position x (mm)");
+  mtree->Branch("secvec_posy",&secvec_posy);
+  mtree->GetBranch("secvec_posy")->SetTitle("secvec position y (mm)");
+  mtree->Branch("secvec_posz",&secvec_posz);
+  mtree->GetBranch("secvec_posz")->SetTitle("secvec position z (mm)");
+  mtree->Branch("secvec_poserrorx",&secvec_poserrorx);
+  mtree->GetBranch("secvec_poserrorx")->SetTitle("secvec position x error (mm)");
+  mtree->Branch("secvec_poserrory",&secvec_poserrory);
+  mtree->GetBranch("secvec_poserrory")->SetTitle("secvec position y error (mm)");
+  mtree->Branch("secvec_poserrorz",&secvec_poserrorz);
+  mtree->GetBranch("secvec_poserrorz")->SetTitle("secvec position z error (mm)");
   mtree->Branch("secvec_disp",&secvec_disp);
   mtree->GetBranch("secvec_disp")->SetTitle("secvec displacement from primary vertex (mm)");
   mtree->Branch("secvec_dispR",&secvec_dispR);
@@ -241,6 +260,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 
   numelectron = 0;
   numsecvec = 0;
+  numdisp = 0;
   electron_e.clear();
   electron_pt.clear();
   electron_px.clear();
@@ -257,6 +277,12 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_dz.clear();
   electron_dxyError.clear();
   electron_dzError.clear();
+  secvec_posx.clear();
+  secvec_posy.clear();
+  secvec_posz.clear();
+  secvec_poserrorx.clear();
+  secvec_poserrory.clear();
+  secvec_poserrorz.clear();
   secvec_disp.clear();
   secvec_dispR.clear();
   secvec_deltaR.clear();
@@ -468,6 +494,44 @@ if(!isData){
       electron_dxyError.push_back(trk->d0Error());
       electron_dzError.push_back(trk->dzError());
     }
+/////////////////////////////////////Best Gen particle match//////////////////////////////////
+   Handle<GenParticleCollection> genParticles;
+   iEvent.getByLabel("genParticles", genParticles);
+   vector<GenParticle> genElec;
+
+   //storing selected electrons
+   for(size_t i = 0; i < genParticles->size(); ++ i) {
+
+     const GenParticle & p = (*genParticles)[i];
+     int id = abs(p.pdgId());
+     int st = p.status();
+     if(id==11 && st==1){genElec.emplace_back(p);}
+   }
+
+   //Comparing deltaR GenvsReco
+     //cout<<"\n\n No.Reco: "<<myelectrons->size()<<" No.Gen: "<<genElec.size()<<"\n\n"<<endl;
+
+   for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
+   {
+     float saveDR=100;
+     int idg=-1; //identity gen particle
+     for(auto g=genElec.begin(); g!=genElec.end(); g++)
+     {
+        if(deltaR(g->p4(),itElec1->p4())<saveDR){
+       	   saveDR=deltaR(g->p4(),itElec1->p4());
+           idg=g-genElec.begin();
+        }
+     }
+     /*cout<<"Idex: "<<idg<<" Recop4: "<< itElec1->p4()<<endl;
+     if(idg!=-1){
+	auto g=genElec.begin()+idg;
+	cout<<"Genp4: "<<g->p4()<<" deltaR: "<<deltaR(g->p4(),itElec1->p4())<<"\n"<<endl;
+}*/
+   }
+
+
+
+/////////////////////////////////////////End best Gen match//////////////////////////////////
 
 ///////////////////////////////////////Secondary Vertices//////////////////////////////////////////////
 
@@ -498,6 +562,8 @@ if(!isData){
 //iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
 float saveDR=100;
 int identyTrack[myelectrons->size()];
+for(size_t x=0; x!=myelectrons->size();x++){identyTrack[x]=-1;}
+
 int k=0;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 {
@@ -516,10 +582,6 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
         j++;
      }
   }
- }
- else
- {
-   identyTrack[k]=-1;
  }
  k++;
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
@@ -547,7 +609,8 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 
          if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
 
-	   //cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<'\n'<<endl;
+	   //cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt();
+	   //cout<<" deltaR: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta())<<endl;
 
            //auto trk1 = itElec1->gsfTrack();
            //TransientTrack t_tks = (*theB).build(tks);
@@ -558,15 +621,21 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 
            trackVec.push_back(t_tks[i]);
            trackVec.push_back(t_tks[j]);
-
-           TransientVertex myVertex = fitter.vertex(trackVec);
+           TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
+	   trackVec.clear();
 
         int k=0;
-
        if(myVertex.isValid()){
+	numsecvec++;
+	secvec_posx.push_back(myVertex.position().x());
+  	secvec_posy.push_back(myVertex.position().y());
+  	secvec_posz.push_back(myVertex.position().z());
+  	secvec_poserrorx.push_back(myVertex.positionError().cxx());
+  	secvec_poserrory.push_back(myVertex.positionError().cyy());
+  	secvec_poserrorz.push_back(myVertex.positionError().czz());
 	for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 	{
-             numsecvec++;//total of secondary vertex disp per event
+             numdisp++;//total of secondary vertex disp per event
 	     k++;//# of saved disp per SecondaryVertex
 
 	     //primaryvertex
@@ -595,7 +664,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
              disp= sqrt(dispx*dispx + dispy*dispy + dispz*dispz);
              //cout<<"Displacement: "<<disp<<endl;
              dispR= sqrt(dispx*dispx + dispy*dispy + dispz*dispz)/err;
-	     //cout<<"Weigthed Displacement: "<<dispR<<endl;
+	     //cout<<"Weigthed Displacement: "<<dispR<<'\n'<<endl;
 
 
              //displacements store
@@ -606,6 +675,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 
              //DeltaR identification
              float DeltaRPrima = deltaR(itElec1->eta(),itElec1->phi(),itTrack2->eta(),itTrack2->phi());
+	     //cout<<"DeltaR: "<<DeltaRPrima<<'\n'<<endl;
 
              secvec_deltaR.push_back(DeltaRPrima);
              if(i==0){secvec_deltaR1.push_back(DeltaRPrima);}
@@ -617,7 +687,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 		if(dispR > savedisp.at(k-1))
 		{
 		  savedisp.at(k-1)=dispR;
-		  electron_Bsecvec.at(k)=numsecvec;
+		  electron_Bsecvec.at(k-1)=numdisp;
 		}
 	     }
 
