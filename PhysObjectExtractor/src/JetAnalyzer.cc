@@ -37,7 +37,7 @@
 #include "SimDataFormats/JetMatching/interface/JetFlavourInfoMatching.h"
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
-
+#include "DataFormats/Math/interface/deltaR.h"
 
 //classes to save data
 #include "TTree.h"
@@ -92,6 +92,7 @@ private:
   bool isData;
 
   int numjet; //number of jets in the event
+  int numZjet; //number of First Z daug in the event
   TTree *mtree;
   std::vector<float> jet_e;
   std::vector<float> jet_pt;
@@ -102,6 +103,15 @@ private:
   std::vector<float> jet_phi;
   std::vector<float> jet_ch;
   std::vector<float> jet_mass;
+  std::vector<float> genjet_e;
+  std::vector<float> genjet_pt;
+  std::vector<float> genjet_px;
+  std::vector<float> genjet_py;
+  std::vector<float> genjet_pz;
+  std::vector<float> genjet_eta;
+  std::vector<float> genjet_phi;
+  std::vector<float> genjet_ch;
+  std::vector<float> genjet_mass;
   std::vector<double> jet_btag;
   std::vector<float> corr_jet_pt;
   std::vector<float> corr_jet_ptUp;
@@ -180,6 +190,26 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("jet_ch")->SetTitle("Jet Charge");
   mtree->Branch("jet_mass",&jet_mass);
   mtree->GetBranch("jet_mass")->SetTitle("Jet Mass");
+  mtree->Branch("numberZjet",&numZjet);
+  mtree->GetBranch("numberZjet")->SetTitle("Number of first Z daugthers");
+  mtree->Branch("genjet_e",&genjet_e);
+  mtree->GetBranch("genjet_e")->SetTitle("Uncorrected gen Jet Energy");
+  mtree->Branch("genjet_pt",&genjet_pt);
+  mtree->GetBranch("genjet_pt")->SetTitle("Uncorrected gen Transverse Jet Momentum");
+  mtree->Branch("genjet_px",&genjet_px);
+  mtree->GetBranch("genjet_px")->SetTitle("X-Component of gen Jet Momentum");
+  mtree->Branch("genjet_py",&genjet_py);
+  mtree->GetBranch("genjet_py")->SetTitle("Y-Component of gen Jet Momentum");
+  mtree->Branch("genjet_pz",&genjet_pz);
+  mtree->GetBranch("genjet_pz")->SetTitle("Z-Component of gen Jet Momentum");
+  mtree->Branch("genjet_eta",&genjet_eta);
+  mtree->GetBranch("genjet_eta")->SetTitle("gen Jet Eta");
+  mtree->Branch("genjet_phi",&genjet_phi);
+  mtree->GetBranch("genjet_phi")->SetTitle("gen Jet Phi");
+  mtree->Branch("genjet_ch",&genjet_ch);
+  mtree->GetBranch("genjet_ch")->SetTitle("gen Jet Charge");
+  mtree->Branch("genjet_mass",&genjet_mass);
+  mtree->GetBranch("genjet_mass")->SetTitle("gen Jet Mass");
   mtree->Branch("jet_btag",&jet_btag);
   mtree->GetBranch("jet_btag")->SetTitle("Jet Btagging Discriminant (CSV)");
   mtree->Branch("corr_jet_pt",&corr_jet_pt);
@@ -334,6 +364,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   using namespace edm;
   using namespace std;
+  using namespace reco;
 
   Handle<reco::PFJetCollection> myjets;
   iEvent.getByLabel(jetInput, myjets);
@@ -358,13 +389,67 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   jet_phi.clear();
   jet_ch.clear();
   jet_mass.clear();
+  numZjet = 0;
+  genjet_e.clear();
+  genjet_pt.clear();
+  genjet_px.clear();
+  genjet_py.clear();
+  genjet_pz.clear();
+  genjet_eta.clear();
+  genjet_phi.clear();
+  genjet_ch.clear();
+  genjet_mass.clear();
   jet_btag.clear();
   corr_jet_pt.clear();
   corr_jet_ptUp.clear();
   corr_jet_ptDown.clear();
   corr_jet_ptSmearUp.clear();
   corr_jet_ptSmearDown.clear();
+
+
+///////////////////Z dau to jet identifier/////////////////////////////
+        vector<GenParticle> genZdau;
+
+        if(!isData){
+          Handle<GenParticleCollection> genParticles;
+          iEvent.getByLabel("genParticles", genParticles);
+
+          for(size_t i = 0; i < genParticles->size(); ++ i) {
+
+            const GenParticle & p = (*genParticles)[i];
+            int id = abs(p.pdgId());
+            //cout<<id<<endl;
+
+            if(id==23){
+             
+		int n = p.numberOfDaughters();
+		//cout<<"Nd: "<<n<<endl;
+              
+	     for(int j = 0; j < n; ++ j) {
+                
+	   	const Candidate * d = p.daughter( j );
+                //cout<<"pt: "<<d->pt()<<" pdg: "<<d->pdgId()<<endl;
+		
+		for(size_t k = 0; k < genParticles->size(); ++ k) {
+		  
+		  const GenParticle & dit = (*genParticles)[k];
+		  int ditid=dit.pdgId();
+		  //cout<<ditid<<endl;
+
+		  if( dit.pt()==d->pt() && ditid==d->pdgId() ){
+			genZdau.emplace_back(dit);
+		  }
+		}
+	      }
+	    }
+          }
+	  numZjet=genZdau.size();
+
+	}
+///////////////////Z dau to jet identifier///////////////////
   
+
+
   if(myjets.isValid()){
 
     int hadronFlavour;
@@ -449,7 +534,34 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	corr_jet_ptDown.push_back(ptscale*corrDown*uncorrJet.pt());
 	corr_jet_ptSmearUp.push_back(ptscale_up*corr*uncorrJet.pt());
 	corr_jet_ptSmearDown.push_back(ptscale_down*corr*uncorrJet.pt());
-	
+///////////////////Z dau to jet identifier/////////////////////////////
+	if(!isData){
+     	  float saveDR=100;
+	  int idg=-1; //identity gen particle
+	  for(auto g=genZdau.begin(); g!=genZdau.end(); g++)
+     	  {
+      	    if(deltaR(g->eta(),g->phi(),itjet->eta(),itjet->phi())<saveDR){
+       	      saveDR=deltaR(g->eta(),g->phi(),itjet->eta(),itjet->phi());
+              idg=g-genZdau.begin();
+
+            }
+     	  }
+
+	  if(idg!=-1){
+	    auto g=genZdau.begin()+idg;
+	        genjet_e.push_back(g->energy());
+        	genjet_pt.push_back(g->pt());
+        	genjet_px.push_back(g->px());
+        	genjet_py.push_back(g->py());
+        	genjet_pz.push_back(g->pz());
+        	genjet_eta.push_back(g->eta());
+        	genjet_phi.push_back(g->phi());
+        	genjet_ch.push_back(g->charge());
+        	genjet_mass.push_back(g->mass());
+
+	  }
+	}
+///////////////////Z dau to jet identifier///////////////////
 	if (!isData){
 	  SF = 1;
 	  SFu = 1;
@@ -510,8 +622,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     btagWeight = (btagWeight/MC);
     btagWeightUp = (btagWeightUp/MC);
     btagWeightDn = (btagWeightDn/MC);   
-  }
-  
+   }  
   mtree->Fill();
   return;
   

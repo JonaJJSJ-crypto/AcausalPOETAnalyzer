@@ -73,7 +73,8 @@ private:
 
 
   TTree *mtree;
-  int numelectron; //number of electrons in the event
+  int numelectron; //number of reco electrons in the event
+  int numgenelec; //# of gen electrons in the event
   int numsecvec;  //number of secondary vertex disp in the event
   int numdisp;  //tool for finding best match for electrons
   std::vector<float> electron_e;
@@ -84,6 +85,14 @@ private:
   std::vector<float> electron_eta;
   std::vector<float> electron_phi;
   std::vector<float> electron_ch;
+  std::vector<float> genelec_e;
+  std::vector<float> genelec_pt;
+  std::vector<float> genelec_px;
+  std::vector<float> genelec_py;
+  std::vector<float> genelec_pz;
+  std::vector<float> genelec_eta;
+  std::vector<float> genelec_phi;
+  std::vector<float> genelec_ch;
   std::vector<float> electron_iso;
   std::vector<bool> electron_isLoose;
   std::vector<bool> electron_isMedium;
@@ -135,7 +144,9 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 
 
   mtree->Branch("numberelectron",&numelectron);
-  mtree->GetBranch("numberelectron")->SetTitle("number of electrons");
+  mtree->GetBranch("numberelectron")->SetTitle("number of reco electrons");
+  mtree->Branch("numbergenelec",&numgenelec);
+  mtree->GetBranch("numbergenelec")->SetTitle("number of gen electrons");
   mtree->Branch("numbersecvec",&numsecvec);
   mtree->GetBranch("numbersecvec")->SetTitle("number of secondary vertex displascements");
   mtree->Branch("electron_e",&electron_e);
@@ -154,6 +165,22 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_phi")->SetTitle("electron polar angle");
   mtree->Branch("electron_ch",&electron_ch);
   mtree->GetBranch("electron_ch")->SetTitle("electron charge");
+  mtree->Branch("genelec_e",&genelec_e);
+  mtree->GetBranch("genelec_e")->SetTitle("electron gen energy");
+  mtree->Branch("genelec_pt",&genelec_pt);
+  mtree->GetBranch("genelec_pt")->SetTitle("electron gen transverse momentum");
+  mtree->Branch("genelec_px",&genelec_px);
+  mtree->GetBranch("genelec_px")->SetTitle("electron gen momentum x-component");
+  mtree->Branch("genelec_py",&genelec_py);
+  mtree->GetBranch("genelec_py")->SetTitle("electron gen momentum y-component");
+  mtree->Branch("genelec_pz",&genelec_pz);
+  mtree->GetBranch("genelec_pz")->SetTitle("electron gen momentum z-component");
+  mtree->Branch("genelec_eta",&genelec_eta);
+  mtree->GetBranch("genelec_eta")->SetTitle("electron gen pseudorapidity");
+  mtree->Branch("genelec_phi",&genelec_phi);
+  mtree->GetBranch("genelec_phi")->SetTitle("electron gen polar angle");
+  mtree->Branch("genelec_ch",&genelec_ch);
+  mtree->GetBranch("genelec_ch")->SetTitle("electron gen charge");
   mtree->Branch("electron_iso",&electron_iso);
   mtree->GetBranch("electron_iso")->SetTitle("electron isolation");
   mtree->Branch("electron_isLoose",&electron_isLoose);
@@ -269,6 +296,14 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_eta.clear();
   electron_phi.clear();
   electron_ch.clear();
+  genelec_e.clear();
+  genelec_pt.clear();
+  genelec_px.clear();
+  genelec_py.clear();
+  genelec_pz.clear();
+  genelec_eta.clear();
+  genelec_phi.clear();
+  genelec_ch.clear();
   electron_iso.clear();
   electron_isLoose.clear();
   electron_isMedium.clear();
@@ -522,11 +557,20 @@ if(!isData){
            idg=g-genElec.begin();
         }
      }
-     /*cout<<"Idex: "<<idg<<" Recop4: "<< itElec1->p4()<<endl;
+     //cout<<"Idex: "<<idg<<" Recop4: "<< itElec1->p4()<<endl;
      if(idg!=-1){
 	auto g=genElec.begin()+idg;
-	cout<<"Genp4: "<<g->p4()<<" deltaR: "<<deltaR(g->p4(),itElec1->p4())<<"\n"<<endl;
-}*/
+	//cout<<"Genp4: "<<g->p4()<<" deltaR: "<<deltaR(g->p4(),itElec1->p4())<<"\n"<<endl;
+      	genelec_e.push_back(g->energy());
+      	genelec_pt.push_back(g->pt());
+      	genelec_px.push_back(g->px());
+      	genelec_py.push_back(g->py());
+      	genelec_pz.push_back(g->pz());
+      	genelec_eta.push_back(g->eta());
+      	genelec_phi.push_back(g->phi());
+      	genelec_ch.push_back(g->charge());
+
+     }
    }
 
 
@@ -559,14 +603,14 @@ if(!isData){
   float yerr;
   float zerr;
 
-//iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
+//iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf 
 float saveDR=100;
 int identyTrack[myelectrons->size()];
 for(size_t x=0; x!=myelectrons->size();x++){identyTrack[x]=-1;}
 
 int k=0;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
-{
+{ 
  if(itElec1->pt()>20)
  {
   int j=0;
@@ -585,7 +629,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
  }
  k++;
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
-}
+}  
 //fin identifier
 
 vector<float> savedisp (myelectrons->size());
@@ -603,25 +647,32 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        {
 
        if( itTrack2->pt()>10 ){
+	int j3=0;
+	for(TrackCollection::const_iterator itTrack3 = tracks->begin(); itTrack3 != tracks->end(); ++itTrack3)
+  	{
+	if( itTrack3->pt()>10 ){
 
          KalmanVertexFitter fitter;
          vector<TransientTrack> trackVec;
 
          if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
-
-	   //cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt();
-	   //cout<<" deltaR: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta())<<endl;
+	  if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
+	   
+	   /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
+	   cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
+	   cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
 
            //auto trk1 = itElec1->gsfTrack();
-           //TransientTrack t_tks = (*theB).build(tks);
+           TransientTrack t_trk1 = (* theB).build(* itTrack1);
 
            //auto trk2 = itElec2->gsfTrack();
-           //TransientTrack t_trk2 = (*theB).build(itTrack2);
+           TransientTrack t_trk2 = (* theB).build(* itTrack2);
+	   TransientTrack t_trk3 = (* theB).build(* itTrack3);
 
-
-           trackVec.push_back(t_tks[i]);
-           trackVec.push_back(t_tks[j]);
-           TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
+           trackVec.push_back(t_trk1);
+           trackVec.push_back(t_trk2);
+	   trackVec.push_back(t_trk3);
+           TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes 
 	   trackVec.clear();
 
         int k=0;
@@ -635,9 +686,9 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
   	secvec_poserrorz.push_back(myVertex.positionError().czz());
 	for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 	{
-             numdisp++;//total of secondary vertex disp per event
-	     k++;//# of saved disp per SecondaryVertex
-
+             numdisp++;//total of secondary vertex disp per event 
+	     k++;//# of saved disp per SecondaryVertex 
+         
 	     //primaryvertex
 	     //cout<<"ptE: "<<itElec1->pt()<<endl;
              //cout<<"pvx: "<< itElec1->vx()<<" pvy: "<<itElec1->vy()<<" pvz: "<< itElec1->vz()<<endl;
@@ -691,16 +742,19 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 		}
 	     }
 
-	}// for itElec
+	 }// for itElec
 
-       }
-
-      }//Nonequal Tracks condition
+        }
+	}//nonequal Tracks condition 3-2 3-1
+       }//Nonequal Tracks condition 1-2
+      }
+      j3++;
+      }//for Track3
      }
      j++;
     }
     i++;
- }//finalde if pt track
+ }//finalde if pt track 
     electron_secN.push_back(i);
 }//fin for Track1
 }// Final de Is ValidElectron
