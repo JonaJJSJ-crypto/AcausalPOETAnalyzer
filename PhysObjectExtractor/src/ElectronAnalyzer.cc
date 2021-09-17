@@ -70,7 +70,7 @@ private:
   edm::InputTag electronInput;
 
   // ----------member data ---------------------------
-
+  bool isData;
 
   TTree *mtree;
   int numelectron; //number of reco electrons in the event
@@ -138,6 +138,7 @@ private:
 ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 {
 //now do what ever initialization is needed
+  isData = iConfig.getParameter<bool>("isData");
   electronInput = iConfig.getParameter<edm::InputTag>("InputCollection");
   edm::Service<TFileService> fs;
   mtree = fs->make<TTree>("Events", "Events");
