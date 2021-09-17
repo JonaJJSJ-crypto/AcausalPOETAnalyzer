@@ -530,6 +530,7 @@ if(!isData){
       electron_dzError.push_back(trk->dzError());
     }
 /////////////////////////////////////Best Gen particle match//////////////////////////////////
+if(!isData){}
    Handle<GenParticleCollection> genParticles;
    iEvent.getByLabel("genParticles", genParticles);
    vector<GenParticle> genElec;
@@ -573,7 +574,7 @@ if(!isData){
      }
    }
 
-
+}
 
 /////////////////////////////////////////End best Gen match//////////////////////////////////
 
@@ -603,14 +604,14 @@ if(!isData){
   float yerr;
   float zerr;
 
-//iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf 
+//iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
 float saveDR=100;
 int identyTrack[myelectrons->size()];
 for(size_t x=0; x!=myelectrons->size();x++){identyTrack[x]=-1;}
 
 int k=0;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
-{ 
+{
  if(itElec1->pt()>20)
  {
   int j=0;
@@ -629,7 +630,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
  }
  k++;
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
-}  
+}
 //fin identifier
 
 vector<float> savedisp (myelectrons->size());
@@ -657,7 +658,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 
          if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
 	  if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
-	   
+
 	   /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
 	   cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
 	   cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
@@ -672,7 +673,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
            trackVec.push_back(t_trk1);
            trackVec.push_back(t_trk2);
 	   trackVec.push_back(t_trk3);
-           TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes 
+           TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
 	   trackVec.clear();
 
         int k=0;
@@ -686,9 +687,9 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
   	secvec_poserrorz.push_back(myVertex.positionError().czz());
 	for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 	{
-             numdisp++;//total of secondary vertex disp per event 
-	     k++;//# of saved disp per SecondaryVertex 
-         
+             numdisp++;//total of secondary vertex disp per event
+	     k++;//# of saved disp per SecondaryVertex
+
 	     //primaryvertex
 	     //cout<<"ptE: "<<itElec1->pt()<<endl;
              //cout<<"pvx: "<< itElec1->vx()<<" pvy: "<<itElec1->vy()<<" pvz: "<< itElec1->vz()<<endl;
@@ -754,7 +755,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
      j++;
     }
     i++;
- }//finalde if pt track 
+ }//finalde if pt track
     electron_secN.push_back(i);
 }//fin for Track1
 }// Final de Is ValidElectron
