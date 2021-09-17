@@ -530,7 +530,7 @@ if(!isData){
       electron_dzError.push_back(trk->dzError());
     }
 /////////////////////////////////////Best Gen particle match//////////////////////////////////
-if(!isData){}
+if(!isData){
    Handle<GenParticleCollection> genParticles;
    iEvent.getByLabel("genParticles", genParticles);
    vector<GenParticle> genElec;
