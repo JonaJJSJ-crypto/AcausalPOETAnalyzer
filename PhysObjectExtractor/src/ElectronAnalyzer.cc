@@ -333,8 +333,8 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   Zjet_pt.clear();
 
 //drawer
-bool isData=true;//por terminar
-if(!isData){
+bool Draw=true;//por terminar
+if(!Draw){
    Handle<GenParticleCollection> genParticles;
    iEvent.getByLabel("genParticles", genParticles);
    const GenParticle & t = (*genParticles)[0];
