@@ -185,6 +185,7 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       numtracks=tracks->size();
    for (reco::TrackCollection::const_iterator iTrack = tracks->begin(); iTrack != tracks->end(); ++iTrack)
       {
+       if(iTrack->pt()>5){
         track_pt.push_back(iTrack->pt());
         track_ptError.push_back(iTrack->ptError());
         track_charge.push_back(iTrack->charge());
@@ -200,7 +201,7 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         track_py.push_back(iTrack->py());
         track_pz.push_back(iTrack->pz());
         track_theta.push_back(iTrack->theta());
-        track_thetaError.push_back(iTrack->thetaError());
+        track_thetaError.push_back(iTrack->thetaError());}
       }
    }
 
