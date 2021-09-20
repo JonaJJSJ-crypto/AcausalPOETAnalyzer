@@ -1,34 +1,18 @@
 #!/bin/bash
 
 # Define path for job directories
- BASE_PATH=/afs/cern.ch/work/e/ecarrera/dpoa/workshop2021/CMSSW_5_3_32/src/PhysObjectExtractorTool/PhysObjectExtractor/joblaunch
+ BASE_PATH=/afs/cern.ch/work/e/ecarrera/lw/ntuplizer/CMSSW_5_3_32/src/AcausalPOETAnalyzer/PhysObjectExtractor/joblaunch
 #BASE_PATH=/path/to/job/directory
 mkdir -p $BASE_PATH
 
 # Set processes
 PROCESSES=( \
-    #SMHiggsToZZTo4L \
-    #ZZTo2e2mu \
-    #ZZTo4mu \
-    #ZZTo4e \
-    #GluGluToHToTauTau \
-    #VBF_HToTauTau \
-    #TTbar \
-    #W1JetsToLNu \
-    #W2JetsToLNu \
-    #W3JetsToLNu \
-    #DYJetsToLL \
-    #Run2012B_TauPlusX\
-    #Run2012C_TauPlusX\
-    #DY2JetsToLL \
-    #DY3JetsToLL \
-    #DY4JetsToLL \
-    #Run2012B_SingleMu\
-    #Run2012C_SingleMu\
-    #Run2012B_DoubleMuParked \
-    #Run2012C_DoubleMuParked \
-    #Run2012B_DoubleElectron \
-    #Run2012C_DoubleElectron \
+    Run2012B_DoublePhoton \
+    Run2012C_DoublePhoton \
+    LWSM200DnR \
+    LWSM300DnR \
+    LWSM400DnR \
+    LWSM500DnR \
     )
 
 # Create JDL files and job directories

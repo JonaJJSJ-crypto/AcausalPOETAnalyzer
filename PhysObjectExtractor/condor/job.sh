@@ -19,21 +19,21 @@ FILE=$3
 echo "File:" $FILE
 
 ISDATA=True
-DOPAT=True
+DOPAT=False
 
 EOS_HOME=/eos/user/e/ecarrera
 #EOS_HOME=/eos/user/FIRST_LETTER/USERNAME
 echo "EOS home:" $EOS_HOME
 
-OUTPUT_DIR=${EOS_HOME}/dpoa/workshop2021/
+OUTPUT_DIR=${EOS_HOME}/lee-wick/ntuples/
 #OUTPUT_DIR=${EOS_HOME}/opendata_files/
 echo "Output directory:" $OUTPUT_DIR
 
-CMSSW_BASE=/afs/cern.ch/work/e/ecarrera/dpoa/workshop2021/CMSSW_5_3_32
+CMSSW_BASE=/afs/cern.ch/work/e/ecarrera/lw/ntuplizer/CMSSW_5_3_32
 #CMSSW_BASE=/afs/cern.ch/work/FIRST_LETTER/USERNAME/CMSSW_5_3_32
 echo "CMSSW base:" $CMSSW_BASE
 
- CONFIG=${CMSSW_BASE}/src/PhysObjectExtractorTool/PhysObjectExtractor/python/poet_cfg.py
+CONFIG=${CMSSW_BASE}/src/AcausalPOETAnalyzer/PhysObjectExtractor/python/poet_cfg.py
 
 echo "CMSSW config:" $CONFIG
 
@@ -84,7 +84,7 @@ sed -i -e "s,^files =,files = ['"${FILE}"'] #,g" $CONFIG_COPY
 sed -i -e 's,^files.extend,#files.extend,g' $CONFIG_COPY
 
 # Modify CMSSW config to read lumi mask from EOS
-sed -i -e 's,data/Cert,'${CMSSW_BASE}'/src/PhysObjectExtractorTool/PhysObjectExtractor/data/Cert,g' $CONFIG_COPY
+sed -i -e 's,data/Cert,'${CMSSW_BASE}'/src/AcausalPOETAnalyzer/PhysObjectExtractor/data/Cert,g' $CONFIG_COPY
 
 # Modify config to write output directly to EOS
 sed -i -e 's,myoutput.root,'${PROCESS}_${ID}.root',g' $CONFIG_COPY

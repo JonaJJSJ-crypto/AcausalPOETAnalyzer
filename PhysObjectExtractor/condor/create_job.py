@@ -12,7 +12,7 @@ error = err/$(ProcId).$(ClusterID).err
 log = log/$(ProcId).$(ClusterID).log
 max_retries = 3
 RequestCpus = 1
-+MaxRuntime = 1800
++MaxRuntime = 2700
 queue arguments from arguments.txt\
 """
 
