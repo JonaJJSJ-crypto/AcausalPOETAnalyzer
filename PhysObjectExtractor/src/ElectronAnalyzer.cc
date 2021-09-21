@@ -287,6 +287,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
 
   numelectron = 0;
+  numgenelec = 0;
   numsecvec = 0;
   numdisp = 0;
   electron_e.clear();
@@ -544,7 +545,7 @@ if(!isData){
      int st = p.status();
      if(id==11 && st==1){genElec.emplace_back(p);}
    }
-
+   numgenelec=genElec.size();
    //Comparing deltaR GenvsReco
      //cout<<"\n\n No.Reco: "<<myelectrons->size()<<" No.Gen: "<<genElec.size()<<"\n\n"<<endl;
 
