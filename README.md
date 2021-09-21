@@ -1,15 +1,11 @@
 # AcausalPOETAnalyzer
- This repository is based on Physics Object Extractor Tool from [cms-legacydata-analyses](https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool) last updated in 2-September-2021.
+ This repository is based on the `2012` branch of the  Physics Object Extractor Tool (POET) from [cms-legacydata-analyses](https://github.com/cms-legacydata-analyses/PhysObjectExtractorTool) last updated in 2-September-2021. 
 
  ## Description
 
 The POET repository contains packages that verse instructions and examples on how to extract physics (objects) information and methods or tools needed for processing them.  These objects can be: electrons, muons, photons, jets, tracks, etc.  Refer to the appropriate `branches` for the different CMS Open Data epochs :
 
-* `master`: for Run II (extraction from miniAOD) CMS open/legacy data.  In development.
-
 Please check out the `README` in each package for further instructions.
-
-Aditionally, in AcausalPOETAnalyzer are included the reconstruction for secondary vertexes.
 
 ## References
 
