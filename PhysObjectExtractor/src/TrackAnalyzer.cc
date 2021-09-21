@@ -2,7 +2,7 @@
 //
 // Package:    TrackAnalyzer
 // Class:      TrackAnalyzer
-// 
+//
 /**\class TrackAnalyzer TrackAnalyzer.cc Track/TrackAnalyzer/src/TrackAnalyzer.cc
 
  Description: [one line class summary]
@@ -11,7 +11,7 @@
      [Notes on implementation]
 */
 //
-// Original Author:  
+// Original Author:
 //         Created:  Sat Jun 12 11:03:58 CEST 2021
 // $Id$
 //
@@ -64,9 +64,10 @@ class TrackAnalyzer : public edm::EDAnalyzer {
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
       // ----------member data ---------------------------
-    
+    //float ptTrackcut;
+
     TTree *mtree;
-    int numtracks; 
+    int numtracks;
     std::vector<float> track_pt;
     std::vector<float> track_ptError;
     std::vector<float> track_charge;
@@ -100,7 +101,8 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
 
 {
    //now do what ever initialization is needed
-  
+   //ptTrackcut = iConfig.getParameter<int>(ptTcut);
+
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
    mtree->Branch("numtracks",&numtracks);
@@ -110,13 +112,13 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
    mtree->Branch("track_ptError",&track_ptError);
    mtree->GetBranch("track_ptError")->SetTitle("error on track transverse momentum");
    mtree->Branch("track_charge",&track_charge);
-   mtree->GetBranch("track_charge")->SetTitle("track charge"); 
+   mtree->GetBranch("track_charge")->SetTitle("track charge");
    mtree->Branch("track_chi2",&track_chi2);
    mtree->GetBranch("track_chi2")->SetTitle("track chi2");
    mtree->Branch("track_eta",&track_eta);
-   mtree->GetBranch("track_eta")->SetTitle("track pseudorapidity of momentum vector");  
+   mtree->GetBranch("track_eta")->SetTitle("track pseudorapidity of momentum vector");
    mtree->Branch("track_etaError",&track_etaError);
-   mtree->GetBranch("track_etaError")->SetTitle("track error on pseudorapidity of momentum vector"); 
+   mtree->GetBranch("track_etaError")->SetTitle("track error on pseudorapidity of momentum vector");
    mtree->Branch("track_lambda",&track_lambda);
    mtree->GetBranch("track_lambda")->SetTitle("track lambda");
    mtree->Branch("track_lambdaError",&track_lambdaError);
@@ -126,11 +128,11 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
    mtree->Branch("track_phi",&track_phi);
    mtree->GetBranch("track_phi")->SetTitle("track azimuthal angle of momentum vector");
    mtree->Branch("track_phiError",&track_phiError);
-   mtree->GetBranch("track_phiError")->SetTitle("error on track azimuthal angle of momentum vector"); 
+   mtree->GetBranch("track_phiError")->SetTitle("error on track azimuthal angle of momentum vector");
    mtree->Branch("track_px",&track_px);
    mtree->GetBranch("track_px")->SetTitle("track x coordinate of momentum vector");
    mtree->Branch("track_py",&track_py);
-   mtree->GetBranch("track_py")->SetTitle("track y coordinate of momentum vector"); 
+   mtree->GetBranch("track_py")->SetTitle("track y coordinate of momentum vector");
    mtree->Branch("track_pz",&track_pz);
    mtree->GetBranch("track_pz")->SetTitle("track z coordinate of momentum vector");
    mtree->Branch("track_theta",&track_theta);
@@ -142,7 +144,7 @@ TrackAnalyzer::TrackAnalyzer(const edm::ParameterSet& iConfig)
 
 TrackAnalyzer::~TrackAnalyzer()
 {
- 
+
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 
@@ -182,7 +184,6 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(tracks.isValid())
    {
-      numtracks=tracks->size();
    for (reco::TrackCollection::const_iterator iTrack = tracks->begin(); iTrack != tracks->end(); ++iTrack)
       {
        if(iTrack->pt()>5){
@@ -201,7 +202,8 @@ TrackAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         track_py.push_back(iTrack->py());
         track_pz.push_back(iTrack->pz());
         track_theta.push_back(iTrack->theta());
-        track_thetaError.push_back(iTrack->thetaError());}
+        track_thetaError.push_back(iTrack->thetaError());
+	numtracks++;}
       }
    }
 
@@ -219,7 +221,7 @@ TrackAnalyzer::beginJob()
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
-TrackAnalyzer::endJob() 
+TrackAnalyzer::endJob()
 {
 }
 
