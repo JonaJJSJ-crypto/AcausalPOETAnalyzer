@@ -325,6 +325,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_deltaR.clear();
   secvec_deltaR1.clear();
   secvec_deltaR2.clear();
+  electron_Bsecvec.clear();
   electron_secN.clear();
   electron_deltaRsim.clear();
   electron_deltaR1sim.clear();
@@ -459,9 +460,10 @@ if(!Draw){
 
   if(myelectrons.isValid()){
     // get the number of electrons in the event
-    numelectron=myelectrons->size();
+    //numelectron=myelectrons->size();
     //cout<<"No.Ele: "<<numelectron<<endl;
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+      if(itElec->pt()>5){numelectron++;//Here get actual number of electrons
 
       int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
       bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
@@ -531,6 +533,7 @@ if(!Draw){
       electron_dxyError.push_back(trk->d0Error());
       electron_dzError.push_back(trk->dzError());
     }
+    }
 /////////////////////////////////////Best Gen particle match//////////////////////////////////
 if(!isData){
    Handle<GenParticleCollection> genParticles;
@@ -551,6 +554,7 @@ if(!isData){
 
    for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
    {
+     if(itElec1->pt()>5){
      float saveDR=100;
      int idg=-1; //identity gen particle
      for(auto g=genElec.begin(); g!=genElec.end(); g++)
@@ -574,6 +578,7 @@ if(!isData){
       	genelec_ch.push_back(g->charge());
 
      }
+   }
    }
 
 }

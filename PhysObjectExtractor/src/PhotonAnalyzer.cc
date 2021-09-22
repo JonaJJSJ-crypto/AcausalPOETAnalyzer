@@ -38,7 +38,7 @@ class PhotonAnalyzer : public edm::EDAnalyzer {
 public:
   explicit PhotonAnalyzer(const edm::ParameterSet&);
   ~PhotonAnalyzer();
-  
+
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
 private:
@@ -55,12 +55,12 @@ private:
     float NH_AEff;
     float Ph_AEff;
   };
-  virtual struct AEff effectiveArea0p3cone(float eta);  
+  virtual struct AEff effectiveArea0p3cone(float eta);
   //declare the input tag for PhotonCollection
   edm::InputTag photonInput;
 
   // ----------member data ---------------------------
-  
+
   TTree *mtree;
   int numphoton; //number of photons in the event
   std::vector<float> photon_e;
@@ -98,8 +98,8 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
   photonInput = iConfig.getParameter<edm::InputTag>("InputCollection");
   edm::Service<TFileService> fs;
   mtree = fs->make<TTree>("Events", "Events");
-  
-  
+
+
   mtree->Branch("numberphoton",&numphoton);
   mtree->GetBranch("numberphoton")->SetTitle("number of photons");
   mtree->Branch("photon_e",&photon_e);
@@ -121,7 +121,7 @@ PhotonAnalyzer::PhotonAnalyzer(const edm::ParameterSet& iConfig)
   mtree->Branch("photon_chIso",&photon_chIso);
   mtree->GetBranch("photon_chIso")->SetTitle("corrected photon charged hadron isolation");
   mtree->Branch("photon_nhIso",&photon_nhIso);
-  mtree->GetBranch("photon_nhIso")->SetTitle("corrected photon neutral hadron isolation");  
+  mtree->GetBranch("photon_nhIso")->SetTitle("corrected photon neutral hadron isolation");
   mtree->Branch("photon_phIso",&photon_phIso);
   mtree->GetBranch("photon_phIso")->SetTitle("corrected photon isolation from other photons");
   mtree->Branch("photon_isLoose",&photon_isLoose);
@@ -205,7 +205,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    Handle<double> rhoHandle;
    iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
    double rhoIso = 0;
-   if(rhoHandle.isValid()) rhoIso = std::max(*(rhoHandle.product()), 0.0);   
+   if(rhoHandle.isValid()) rhoIso = std::max(*(rhoHandle.product()), 0.0);
    Handle<reco::PFCandidateCollection> pfCands;
    iEvent.getByLabel("particleFlow", pfCands);
    Handle<reco::VertexCollection> vertices;
@@ -229,8 +229,9 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
    if(myphotons.isValid()){
      // get the number of photons in the event
-     numphoton=myphotons->size();
+     //numphoton=myphotons->size();
      for (reco::PhotonCollection::const_iterator itphoton=myphotons->begin(); itphoton!=myphotons->end(); ++itphoton){
+       if (itphoton->pt()>5) {numphoton++;//actual number of photons
        bool passelectronveto = !ConversionTools::hasMatchedPromptElectron(itphoton->superCluster(), electrons, hConversions, beamspot.position());
        double scEta = (itphoton)->superCluster()->eta();
        struct PhotonAnalyzer::AEff aEff = effectiveArea0p3cone(scEta);
@@ -247,8 +248,8 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        double corrPFPhIso = std::max(isolator.getIsolationPhoton() - rhoIso * aEff.Ph_AEff, 0.)/itphoton->pt();
        bool isLoose = false, isMedium = false, isTight = false;
        if ( itphoton->eta() <= 1.479 ){
-	 if ( ph_hOverEm<.05 && ph_sigIetaIeta<.012 && 
-	      corrPFCHIso<2.6 && corrPFNHIso<(3.5+.04*itphoton->pt()) && 
+	 if ( ph_hOverEm<.05 && ph_sigIetaIeta<.012 &&
+	      corrPFCHIso<2.6 && corrPFNHIso<(3.5+.04*itphoton->pt()) &&
 	      corrPFPhIso<(1.3+.005*itphoton->pt()) && passelectronveto==true) {
 	   isLoose = true;
 
@@ -264,7 +265,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        else if ( itphoton->eta() > 1.479 && itphoton->eta() < 2.5 ) {
 	 if ( ph_hOverEm<.05 && ph_sigIetaIeta<.034 && corrPFCHIso<2.3 && corrPFNHIso<(2.9+.04*itphoton->pt()) && passelectronveto==true ){
 	   isLoose = true;
-	           
+
 	   if ( ph_sigIetaIeta<.033 && corrPFCHIso<1.2 && corrPFNHIso<(1.5+.04*itphoton->pt()) && corrPFPhIso<(1.0+.005*itphoton->pt())) {
 	     isMedium = true;
 
@@ -274,7 +275,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	   }
 	 }
        }
-       
+
        photon_e.push_back(itphoton->energy());
        photon_pt.push_back(itphoton->pt());
        photon_px.push_back(itphoton->px());
@@ -290,11 +291,12 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        photon_isMedium.push_back(isMedium);
        photon_isTight.push_back(isTight);
      }
+     }
   }
-  
+
   mtree->Fill();
   return;
-  
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
