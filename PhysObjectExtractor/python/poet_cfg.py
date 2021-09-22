@@ -218,7 +218,7 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
                               #---- These are example triggers for 2012
                               #---- Wildcards * and ? are accepted (with usual meanings)
                                #---- If left empty, all triggers will run
-                              triggerPatterns = cms.vstring("HLT_L2DoubleMu23_NoVertex_v*","HLT_Mu12_v*", "HLT_Photon20_CaloIdVL_v*", "HLT_Ele22_CaloIdL_CaloIsoVL_v*", "HLT_Jet370_NoJetID_v*"),
+                              triggerPatterns = cms.vstring("HLT_Photon36_Photon22_v*", "HLT_Photon26_Photon18_v*", "HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v*", "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v*",  "HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v*", "HLT_Photon36_R9Id85_Photon22_R9Id85_v*" ),
                               triggerResults = cms.InputTag("TriggerResults","","HLT"),
                               triggerEvent   = cms.InputTag("hltTriggerSummaryAOD","","HLT")
                               )
