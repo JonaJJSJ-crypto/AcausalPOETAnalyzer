@@ -210,7 +210,7 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 				      #---- Collect particles with specific "pdgid:status"
                                       #---- Check PDG ID in the PDG.
 				      #---- if 0:0, collect them all
-				      input_particle = cms.vstring("1:11","1:13","1:22","2:15")
+				      input_particle = cms.vstring("1:11","0:23","1:-11")
 				      )
 
 process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',

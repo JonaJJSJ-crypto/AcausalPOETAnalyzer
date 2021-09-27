@@ -61,6 +61,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenPart_px;
       std::vector<float> GenPart_py;
       std::vector<float> GenPart_pz;
+      std::vector<int> GenPart_mompdgId;
 };
 
 //
@@ -93,6 +94,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_mass")->SetTitle("generator particle mass");
     mtree->Branch("GenPart_pdgId",&GenPart_pdgId);
     mtree->GetBranch("GenPart_pdgId")->SetTitle("generator particle PDG id");
+    mtree->Branch("GenPart_mompdgId",&GenPart_mompdgId);
+    mtree->GetBranch("GenPart_mompdgId")->SetTitle("generator particle mother PDG id");
     mtree->Branch("GenPart_phi",&GenPart_phi);
     mtree->GetBranch("GenPart_phi")->SetTitle("generator particle azimuthal angle of momentum vector");
     mtree->Branch("GenPart_px",&GenPart_px);
@@ -129,6 +132,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenPart_eta.clear();
    GenPart_mass.clear();
    GenPart_pdgId.clear();
+   GenPart_mompdgId.clear();
    GenPart_phi.clear();
    GenPart_px.clear();
    GenPart_py.clear();
@@ -162,7 +166,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                //loop trough all particles selected in configuration
                for(i=0;i<particle.size();i++)
                {
-                  if((status_parsed[i]==itGenPart->status() && pdgId_parsed[i]==itGenPart->pdgId())||(status_parsed[i]==0 && pdgId_parsed[i]==0))
+                  if((status_parsed[i]==itGenPart->status() && pdgId_parsed[i]==itGenPart->pdgId())||(status_parsed[i]==0 && pdgId_parsed[i]==0)||(status_parsed[i]==0 && pdgId_parsed[i]==itGenPart->pdgId()))
                 {
                   GenPart_pt.push_back(itGenPart->pt());
                   GenPart_eta.push_back(itGenPart->eta());
@@ -173,6 +177,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_px.push_back(itGenPart->px());
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
+		  GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
                 }
                }               
         }
