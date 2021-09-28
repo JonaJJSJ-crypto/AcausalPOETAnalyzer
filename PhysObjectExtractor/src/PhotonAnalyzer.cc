@@ -231,7 +231,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
      // get the number of photons in the event
      //numphoton=myphotons->size();
      for (reco::PhotonCollection::const_iterator itphoton=myphotons->begin(); itphoton!=myphotons->end(); ++itphoton){
-       if (itphoton->pt()>5) {numphoton++;//actual number of photons
+       numphoton++;//actual number of photons
        bool passelectronveto = !ConversionTools::hasMatchedPromptElectron(itphoton->superCluster(), electrons, hConversions, beamspot.position());
        double scEta = (itphoton)->superCluster()->eta();
        struct PhotonAnalyzer::AEff aEff = effectiveArea0p3cone(scEta);
@@ -290,7 +290,7 @@ PhotonAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        photon_isLoose.push_back(isLoose);
        photon_isMedium.push_back(isMedium);
        photon_isTight.push_back(isTight);
-     }
+
      }
   }
 

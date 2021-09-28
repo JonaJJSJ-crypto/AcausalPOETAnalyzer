@@ -335,135 +335,12 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_deltaR2true.clear();
   Zjet_pt.clear();
 
-//drawer
-bool Draw=true;//por terminar
-if(!Draw){
-   Handle<GenParticleCollection> genParticles;
-   iEvent.getByLabel("genParticles", genParticles);
-   const GenParticle & t = (*genParticles)[0];
-   auto ptmp1=t.p4(), ptmp2=t.p4(), ptmpz1=t.p4(), ptmpz2=t.p4();//almacen de hijas
-   int counter=0;//cuenta las hijas almacenadas
-   for(size_t i = 0; i < genParticles->size(); ++ i) {
-
-     const GenParticle & p = (*genParticles)[i];
-     int id = p.pdgId();
-     int st = p.status();
-     const Candidate * mom = p.mother();
-     if(id==556 || id==-556 || id==23){
-     cout<<"\n\n\nPDG: "<<id<<" Status: "<< st<<" mother "<< mom->pdgId() <<endl;
-     double charge = p.charge();
-     double pt = p.pt(), eta = p.eta(), phi = p.phi(), mass = p.mass();
-     double vx = p.vx(), vy = p.vy(), vz = p.vz();
-     cout <<"pt: "<<pt<<" eta: "<<eta<<" phi: "<<phi<<" mass: "<<mass<<" vx: "<<vx<<" vy: "<<vy<<" vz: "<<vz<<" c: "<<charge<<endl;
-     int n = p.numberOfDaughters();
-      for(int j = 0; j < n; ++ j) {
-       const Candidate * d = p.daughter( j );
-       int dauId = d->pdgId();
-       cout<<"  daugther: "<<dauId<<" Dpt: "<<d->pt()<< endl;
-       if(id==23){
-	if(mom->pdgId()==556 || mom->pdgId()==-556)
-	{float Zdpt=d->pt();
-	Zjet_pt.push_back(Zdpt);}
-       }
-       //auto ptmp1=p.p4(), ptmp2=p.p4(), ptmpz1=p.p4(), ptmpz2=p.p4();
-
-       if(dauId==11){
-	 counter++;
-         auto p1=d->p4();
-         ptmp1=d->p4();
-        //float phi1=d->phi(), eta1=d->eta();
-        cout << "   p4_1: "<<p1<<" pt: "<<d->pt()<< endl;
-        for(size_t k = 0; k < genParticles->size(); ++ k) {
-          const GenParticle & q = (*genParticles)[k];
-          auto q4=q.p4();
-          float DeltaRMC1=deltaR(p1,q4);
-          //cout<<"deltaRsim: "<<DeltaRMC1<<endl;
-          if(DeltaRMC1>10){DeltaRMC1=9;}
-	  electron_deltaRsim.push_back(DeltaRMC1);
-          electron_deltaR1sim.push_back(DeltaRMC1);
-	}
-       }
-       else if(dauId==-11){
-	counter++;
-        auto p2=d->p4();
-	ptmp2=p2;
-        //float phi2=d.phi(), eta2=d.eta();
-        cout << "   p4_2: "<<p2<<" pt: "<<d->pt()<<endl;
-        for(size_t k = 0; k < genParticles->size(); ++ k) {
-          const GenParticle & q = (*genParticles)[k];
-          auto q4=q.p4();
-          float DeltaRMC2=deltaR(p2,q4);
-          ////cout<<"deltaRsim: "<<DeltaRMC2<<endl;
-	  if(DeltaRMC2>10){DeltaRMC2=9;}
-          electron_deltaRsim.push_back(DeltaRMC2);
-          electron_deltaR2sim.push_back(DeltaRMC2);
-        }
-       }
-       else if(dauId==23 && id==556){
-	counter++;
-        auto pz1=d->p4();
-	ptmpz1=pz1;
-	cout << "   p4_Z1: "<<pz1<<" pt: "<<d->pt()<<endl;
-	//int nd = d->numberOfDaughters();
-        ////cout<<"\n\nZd#: "<<nd<<"\n\n"<<endl;
-        //const GenParticle * dit = d;
-	/*for(size_t k = 0; k < genParticles->size(); ++ k) {
-
-	  const GenParticle & dit = (*genParticles)[k];
-	  if (dit.pdgId()==23 && dit.pt()==d->pt()){
-	     cout<<"genpt: "<<dit.pt()<<" Zd#: "<<dit.numberOfDaughters()<<endl;
-	  }
-
-          if(dit->pdgId()!=23){
-                cout<<"pdg hija Z: "<<dit->pdgId()<<" ptd: "<<dit->pt()<<endl;
-
-          }
-          else{
-               	Candidate * dit = dit.daugther(k);
-          }
-	}*/
-
-       }
-       else if(dauId==23 && id==-556){
-	counter++;
-        auto pz2=d->p4();
-	ptmpz2=pz2;
-        //cout << "   p4_Z2: "<<pz2<<" pt: "<<d->pt()<<endl;
-       }
-
-       if(counter==4){//almacenado de hijas
-       cout<<"\nDeltaR1: "<<deltaR(ptmp1,ptmp2)<<' '<<deltaR(ptmp1,ptmpz1)<<' '<<deltaR(ptmp1,ptmpz2)<<endl;
-       cout<<"DeltaR2: "<<deltaR(ptmp2,ptmp1)<<' '<<deltaR(ptmp2,ptmpz1)<<' '<<deltaR(ptmp2,ptmpz2)<<"\n"<<endl;
-
-       electron_deltaRtrue.push_back(deltaR(ptmp1,ptmp2));
-       electron_deltaRtrue.push_back(deltaR(ptmp1,ptmpz1));
-       electron_deltaRtrue.push_back(deltaR(ptmp1,ptmpz2));
-       electron_deltaRtrue.push_back(deltaR(ptmp2,ptmp1));
-       electron_deltaRtrue.push_back(deltaR(ptmp2,ptmpz1));
-       electron_deltaRtrue.push_back(deltaR(ptmp2,ptmpz2));
-
-       electron_deltaR1true.push_back(deltaR(ptmp1,ptmp2));
-       electron_deltaR1true.push_back(deltaR(ptmp1,ptmpz1));
-       electron_deltaR1true.push_back(deltaR(ptmp1,ptmpz2));
-
-       electron_deltaR2true.push_back(deltaR(ptmp1,ptmp2));
-       electron_deltaR2true.push_back(deltaR(ptmp2,ptmpz1));
-       electron_deltaR2true.push_back(deltaR(ptmp2,ptmpz2));
-
-       }
-
-      }
-     }
-   }
-}
-///Drawer
-
   if(myelectrons.isValid()){
     // get the number of electrons in the event
     //numelectron=myelectrons->size();
     //cout<<"No.Ele: "<<numelectron<<endl;
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
-      if(itElec->pt()>5){numelectron++;//Here get actual number of electrons
+      numelectron++;//Here get actual number of electrons
 
       int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
       bool passelectronveto = !ConversionTools::hasMatchedConversion(*itElec, hConversions, beamspot.position());
@@ -532,7 +409,7 @@ if(!Draw){
       electron_dz.push_back(trk->dz(pv));
       electron_dxyError.push_back(trk->d0Error());
       electron_dzError.push_back(trk->dzError());
-    }
+
     }
 /////////////////////////////////////Best Gen particle match//////////////////////////////////
 if(!isData){
@@ -554,7 +431,6 @@ if(!isData){
 
    for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
    {
-     if(itElec1->pt()>5){
      float saveDR=100;
      int idg=-1; //identity gen particle
      for(auto g=genElec.begin(); g!=genElec.end(); g++)
@@ -578,7 +454,7 @@ if(!isData){
       	genelec_ch.push_back(g->charge());
 
      }
-   }
+
    }
 
 }
