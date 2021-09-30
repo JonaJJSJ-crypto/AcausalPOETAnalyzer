@@ -244,6 +244,11 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #                                   tau_minpt = cms.double(20),
 #                                   tau_etacut = cms.double(2.3)
 #                                   )
+process.elefilter = cms.EDFilter('SimpleEleFilter',
+                                  InputCollectionElectrons = cms.InputTag("gsfElectrons"),
+                                   ele_minpt = cms.double(17),
+                                   ele_etacut = cms.double(2.1)
+                                   )
 
 
 
@@ -259,5 +264,5 @@ process.TFileService = cms.Service(
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
 else:
-	if isData: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
-	else: process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
+	if isData: process.p = cms.Path(process.elefilter + process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
+	else: process.p = cms.Path(process.elefilter + process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
