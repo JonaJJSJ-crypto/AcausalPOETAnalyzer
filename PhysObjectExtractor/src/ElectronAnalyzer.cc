@@ -93,6 +93,7 @@ private:
   std::vector<float> genelec_eta;
   std::vector<float> genelec_phi;
   std::vector<float> genelec_ch;
+  std::vector<float> genelec_DRscore;
   std::vector<float> electron_iso;
   std::vector<bool> electron_isLoose;
   std::vector<bool> electron_isMedium;
@@ -182,6 +183,8 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("genelec_phi")->SetTitle("electron gen polar angle");
   mtree->Branch("genelec_ch",&genelec_ch);
   mtree->GetBranch("genelec_ch")->SetTitle("electron gen charge");
+  mtree->Branch("genelec_DRscore",&genelec_DRscore);
+  mtree->GetBranch("genelec_DRscore")->SetTitle("electron delta R score obtained during fitting");
   mtree->Branch("electron_iso",&electron_iso);
   mtree->GetBranch("electron_iso")->SetTitle("electron isolation");
   mtree->Branch("electron_isLoose",&electron_isLoose);
@@ -306,6 +309,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   genelec_eta.clear();
   genelec_phi.clear();
   genelec_ch.clear();
+  genelec_DRscore.clear();
   electron_iso.clear();
   electron_isLoose.clear();
   electron_isMedium.clear();
@@ -392,7 +396,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  }
 	}
       }
-
+	//cout<<"Correspondance:"<<itElec->p4()<<endl;
       electron_e.push_back(itElec->energy());
       electron_pt.push_back(itElec->pt());
       electron_px.push_back(itElec->px());
@@ -452,7 +456,7 @@ if(!isData){
       	genelec_eta.push_back(g->eta());
       	genelec_phi.push_back(g->phi());
       	genelec_ch.push_back(g->charge());
-
+	genelec_DRscore.push_back(deltaR(g->p4(),itElec1->p4()));
      }
 
    }
