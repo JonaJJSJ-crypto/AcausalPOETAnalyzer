@@ -112,6 +112,7 @@ private:
   std::vector<float> genjet_phi;
   std::vector<float> genjet_ch;
   std::vector<float> genjet_mass;
+  std::vector<float> genjet_DRscore;
   std::vector<double> jet_btag;
   std::vector<float> corr_jet_pt;
   std::vector<float> corr_jet_ptUp;
@@ -210,6 +211,8 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("genjet_ch")->SetTitle("gen Jet Charge");
   mtree->Branch("genjet_mass",&genjet_mass);
   mtree->GetBranch("genjet_mass")->SetTitle("gen Jet Mass");
+  mtree->Branch("genjet_DRscore",&genjet_DRscore);
+  mtree->GetBranch("genjet_DRscore")->SetTitle("gen Jet Delta R for matching with gen particles");
   mtree->Branch("jet_btag",&jet_btag);
   mtree->GetBranch("jet_btag")->SetTitle("Jet Btagging Discriminant (CSV)");
   mtree->Branch("corr_jet_pt",&corr_jet_pt);
@@ -399,6 +402,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   genjet_phi.clear();
   genjet_ch.clear();
   genjet_mass.clear();
+  genjet_DRscore.clear();
   jet_btag.clear();
   corr_jet_pt.clear();
   corr_jet_ptUp.clear();
@@ -415,7 +419,6 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
           iEvent.getByLabel("genParticles", genParticles);
 
           for(size_t i = 0; i < genParticles->size(); ++ i) {
-
             const GenParticle & p = (*genParticles)[i];
             int id = abs(p.pdgId());
             //cout<<id<<endl;
@@ -438,6 +441,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 		  if( dit.pt()==d->pt() && ditid==d->pdgId() ){
 			genZdau.emplace_back(dit);
+			//if(ditid>10 && ditid<19) cout<<"pdgl: "<<ditid<<endl;
 		  }
 		}
 	      }
@@ -558,6 +562,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         	genjet_phi.push_back(g->phi());
         	genjet_ch.push_back(g->charge());
         	genjet_mass.push_back(g->mass());
+                genjet_DRscore.push_back(deltaR(g->eta(),g->phi(),itjet->eta(),itjet->phi()));
 
 	  }
 	}
