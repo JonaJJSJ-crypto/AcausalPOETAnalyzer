@@ -246,8 +246,8 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #                                   )
 process.elefilter = cms.EDFilter('SimpleEleFilter',
                                   InputCollectionElectrons = cms.InputTag("gsfElectrons"),
-                                   ele_minpt = cms.double(17),
-                                   ele_etacut = cms.double(2.1)
+                                   ele_minpt = cms.double(17)
+                                   #ele_etacut = cms.double(2.1)
                                    )
 
 
