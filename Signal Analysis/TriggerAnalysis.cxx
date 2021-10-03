@@ -313,13 +313,14 @@ void EventLoopAnalysisTemplate::analysis()
       Triggcount++;
       hists[6]->Fill(electron_pt->size());
       for (size_t i = 0; i < electron_pt->size(); i++) {
-              hists[7]->Fill(electron_pt->at(0));
-              hists[8]->Fill(electron_eta->at(0));
+              //cout<<electron_pt->at(i)<<'\n';
+              hists[7]->Fill(electron_pt->at(i));
+              hists[8]->Fill(electron_eta->at(i));
       }
       hists[9]->Fill(photon_pt->size());
       for (size_t i = 0; i < photon_pt->size(); i++) {
-              hists[10]->Fill(photon_pt->at(0));
-              hists[11]->Fill(photon_eta->at(0));
+              hists[10]->Fill(photon_pt->at(i));
+              hists[11]->Fill(photon_eta->at(i));
       }
 
 
