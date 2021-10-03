@@ -47,12 +47,18 @@ TH1F* LW200triggps_3 = new TH1F("LWtrigg3","HLT_Photon36_R9Id85_Photon22_CaloId1
 TH1F* LW200triggps_4 = new TH1F("LWtrigg4","HLT_Photon36_R9Id85_Photon22_R9Id85",2,0,2);
 TH1F* LW200triggps_5 = new TH1F("LWtrigg5","HLT_Photon36_Photon22",2,0,2);
 TH1F* LW200triggps_6 = new TH1F("LWtrigg6","HLT_Photon26_Photon18",2,0,2);
+TH1F* LW200electron_num = new TH1F("LW200electron_num","number of electrons for missing trigg",10,0,10);
+TH1F* LW200electron_pt = new TH1F("LW200electron_pt","Electrons pt for missing trigg",100,0,200);
+TH1F* LW200electron_eta = new TH1F("LW200electron_eta","Electrons eta for missing trigg",100,-3,3);
+TH1F* LW200photon_num = new TH1F("LW200photon_num","number of photons for missing trigg",10,0,10);
+TH1F* LW200photon_pt = new TH1F("LW200photon_pt","photons pt for missing trigg",100,0,200);
+TH1F* LW200photon_eta = new TH1F("LW200photon_eta","photons eta for missing trigg",100,-3,3);
 const std::string samplesBasePath = "";
 
 
 //book example histograms for specific variables
 //copy them in the constructor if you add more
-const int nhists = 6;
+const int nhists = 12;
 
 //Histograms for signal region
 
@@ -74,12 +80,15 @@ public :
   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
   TTree          *tevents;
   TTree          *ttrigger;
+  TTree          *telectrons;
+  TTree          *tphotons;
 
 
   Int_t           fCurrent; //!current Tree number in a TChain
   TString          labeltag;
   TString         filename;
   Float_t          theweight;
+  Long64_t         Triggcount;
 
   //array to keep histograms to be written and easily loop over them
   TH1F            *hists[nhists];
@@ -87,13 +96,21 @@ public :
   // Declaration of example leaf types
   Int_t           run;
   UInt_t          luminosityBlock;
-  ULong64_t	   event;
+  ULong64_t	      event;
   std::map<std::string, int> *triggermap;
+  vector<float>   *electron_pt;
+  vector<float>   *electron_eta;
+  vector<float>   *photon_pt;
+  vector<float>   *photon_eta;
 
   TBranch        *b_run;   //!
   TBranch        *b_luminosityBlock;   //!
   TBranch        *b_event;   //!
   TBranch        *b_triggermap;   //!
+  TBranch        *b_electron_pt;
+  TBranch        *b_electron_eta;
+  TBranch        *b_photon_pt;
+  TBranch        *b_photon_eta;
 
   EventLoopAnalysisTemplate(TString filename, TString labeltag, Float_t theweight);
   virtual ~EventLoopAnalysisTemplate();
@@ -123,6 +140,12 @@ EventLoopAnalysisTemplate::EventLoopAnalysisTemplate(TString thefile, TString th
   hists[3]=LW200triggps_4;
   hists[4]=LW200triggps_5;
   hists[5]=LW200triggps_6;
+  hists[6]=LW200electron_num;
+  hists[7]=LW200electron_pt;
+  hists[8]=LW200electron_eta;
+  hists[9]=LW200photon_num;
+  hists[10]=LW200photon_pt;
+  hists[11]=LW200photon_eta;
 
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
@@ -132,10 +155,14 @@ EventLoopAnalysisTemplate::EventLoopAnalysisTemplate(TString thefile, TString th
    tree = (TTree*)f->Get("mytriggers/Events");
    //Get trees for friendship
    tevents = (TTree*)f->Get("myevents/Events");
+   telectrons = (TTree*)f->Get("myelectrons/Events");
+   tphotons = (TTree*)f->Get("myphotons/Events");
    //Make friends so we can have access to friends variables
    //we may not use all of the available information
    //it is just an example
    tree->AddFriend(tevents);
+   tree->AddFriend(telectrons);
+   tree->AddFriend(tphotons);
    Init(tree);
 }
 
@@ -181,6 +208,10 @@ void EventLoopAnalysisTemplate::Init(TTree *tree)
 
    // Set object pointer
    triggermap =0;
+   electron_pt=0;
+   electron_eta=0;
+   photon_pt=0;
+   photon_eta=0;
 
    // Set branch addresses and branch pointers
    if (!tree) return;
@@ -194,6 +225,10 @@ void EventLoopAnalysisTemplate::Init(TTree *tree)
    fChain->SetBranchAddress("luminosityBlock", &luminosityBlock, &b_luminosityBlock);
    fChain->SetBranchAddress("event", &event, &b_event);
    fChain->SetBranchAddress("triggermap",&triggermap,&b_triggermap);
+   fChain->SetBranchAddress("electron_pt",&electron_pt,&b_electron_pt);
+   fChain->SetBranchAddress("electron_eta",&electron_eta,&b_electron_eta);
+   fChain->SetBranchAddress("photon_pt",&photon_pt,&b_photon_pt);
+   fChain->SetBranchAddress("photon_eta",&photon_eta,&b_photon_eta);
 
    Notify();
 }
@@ -224,13 +259,17 @@ void EventLoopAnalysisTemplate::Loop()
 
   Long64_t nentries = fChain->GetEntriesFast();
 
+  Long64_t Elecount=0;
+  Triggcount=0;
+
   Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
     //Just an informative printout
-    if(jentry%1000 == 0) {
+    if(jentry%10000 == 0) {
       cout<<"Processed "<<jentry<<" events out of "<<nentries<<endl;
     }
-    //cout<<"Load the current event"<<endl;
+    if(electron_pt->size()==0)Elecount++;//cout<<"Load the current event "<<jentry<<" 0 ele"<<'\n';
+    if(electron_pt->size()==1)Elecount++;//cout<<"Load the current event "<<jentry<<" 1 ele"<<'\n';
     Long64_t ientry = LoadTree(jentry);
     //cout<<ientry<<endl;
     if (ientry < 0) break;
@@ -239,6 +278,8 @@ void EventLoopAnalysisTemplate::Loop()
     analysis();
 
   }
+  cout<<"Number Ele "<<Elecount<<endl;
+  cout<<"Triggcount "<<Triggcount<<endl;
 
 
 }
@@ -258,16 +299,34 @@ void EventLoopAnalysisTemplate::analysis()
 
   //fill histograms for signal region
   Int_t histsize = sizeof(hists)/sizeof(hists[0]);
+  Float_t pstmp;
+
   for (Int_t j=0;j<histsize;++j){
 
     TString histname = TString(hists[j]->GetName());
     TString thelabel = histname(0,histname.First("_"));
     TString thevar = histname(7);
     //cout<<thevar<<'\n';
-    hists[j]->Fill(MinimalSelection(j));
-      //}
-    //}
+    pstmp=MinimalSelection(j);
+    hists[j]->Fill(pstmp);
+    if(pstmp==0 && j==0){
+      Triggcount++;
+      hists[6]->Fill(electron_pt->size());
+      for (size_t i = 0; i < electron_pt->size(); i++) {
+              hists[7]->Fill(electron_pt->at(0));
+              hists[8]->Fill(electron_eta->at(0));
+      }
+      hists[9]->Fill(photon_pt->size());
+      for (size_t i = 0; i < photon_pt->size(); i++) {
+              hists[10]->Fill(photon_pt->at(0));
+              hists[11]->Fill(photon_eta->at(0));
+      }
+
+
+    }
   }
+      //if(electron_pt->size()==0)cout<<electron_pt->size()<<'\n';
+      //hists[6]->Fill(electron_pt->size());
 
 
 
@@ -353,7 +412,7 @@ int main()
     time.Print();
   }
 
-  TFile* hfile = new TFile("histograms.root","RECREATE");
+  TFile* hfile = new TFile("histograms200.root","RECREATE");
 
   //Save signal region histos
   LW200triggps_1->Write();
@@ -362,6 +421,12 @@ int main()
   LW200triggps_4->Write();
   LW200triggps_5->Write();
   LW200triggps_6->Write();
+  LW200electron_num->Write();
+  LW200electron_pt->Write();
+  LW200electron_eta->Write();
+  LW200photon_num->Write();
+  LW200photon_pt->Write();
+  LW200photon_eta->Write();
 
   hfile->Close();
 
