@@ -226,6 +226,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
 		  if(abs(itGenPart->pdgId())!=556)GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
+      else GenPart_mompdgId.push_back(0);
 		  //Daugther store
 		  int n = itGenPart->numberOfDaughters();
 		  numGenDau=n;
