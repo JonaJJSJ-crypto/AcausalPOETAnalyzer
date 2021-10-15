@@ -76,7 +76,11 @@ class SimpleEleFilter : public edm::EDFilter {
 
       // ----------member data ---------------------------
   edm::InputTag electronInput;
+  edm::InputTag trackInput;
   double ele_minpt_;
+  double ele_num_;
+  double trk_minpt_;
+  double trk_num_;
   //double ele_etacut_;
 
 
@@ -97,7 +101,11 @@ SimpleEleFilter::SimpleEleFilter(const edm::ParameterSet& iConfig)
 {
    //now do what ever initialization is needed
   electronInput = iConfig.getParameter<edm::InputTag>("InputCollectionElectrons");
+  trackInput = iConfig.getParameter<edm::InputTag>("InputCollectionTracks");
   ele_minpt_ = iConfig.getParameter<double>("ele_minpt");
+  ele_num_ = iConfig.getParameter<double>("ele_num");
+  trk_minpt_ = iConfig.getParameter<double>("trk_minpt");
+  trk_num_ = iConfig.getParameter<double>("trk_num");  
   //ele_etacut_ = iConfig.getParameter<double>("ele_etacut");
   //ele_mindxy_ = iConfig.getParameter<double>("ele_mindxy")
 }
@@ -125,26 +133,41 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   using namespace std;
 
 
- //Filter on at least one good muon
+ //Filter on at least one good Elec
   Handle<reco::GsfElectronCollection> myelectrons;
   iEvent.getByLabel(electronInput, myelectrons);
 
   Handle<reco::VertexCollection> vertices;
   iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
 
-  bool isGoodElectron =false;
+  Handle<reco::TrackCollection> tracks;
+   iEvent.getByLabel(trackInput, tracks);
 
+  bool isGoodElectron =false;
+  bool isGoodTrack =false;
+  int GoodEleCount = 0;
+  int GoodTrkCount = 0;
   if(myelectrons.isValid()){
     //math::XYZPoint pv(vertices->begin()->position());
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
       auto trk = itElec->gsfTrack();
       if(itElec->pt()>ele_minpt_){
-	isGoodElectron = true;
+	GoodEleCount++;
       }
     }
+    if(GoodEleCount>ele_num_-1)isGoodElectron=true;
   }
-
-   return isGoodElectron;
+  if(tracks.isValid()){
+    for (reco::TrackCollection::const_iterator iTrack = tracks->begin(); iTrack != tracks->end(); ++iTrack){
+      if(iTrack->pt()>trk_minpt_){
+        GoodTrkCount++;
+      }
+    }
+    if(GoodTrkCount>trk_num_-1)isGoodTrack=true;
+  }
+  //isGoodTrack=true;
+  //isGoodElectron=true;
+   return isGoodElectron*isGoodTrack;
 }
 
 // ------------ method called once each job just before starting event loop  ------------
