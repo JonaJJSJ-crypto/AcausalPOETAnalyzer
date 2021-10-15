@@ -246,7 +246,11 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #                                   )
 process.elefilter = cms.EDFilter('SimpleEleFilter',
                                   InputCollectionElectrons = cms.InputTag("gsfElectrons"),
-                                   ele_minpt = cms.double(17)
+				  InputCollectionTracks = cms.InputTag("generalTracks"),
+                                   ele_minpt = cms.double(10),
+				   ele_num = cms.double(2),
+				   trk_minpt = cms.double(-1),
+				   trk_num = cms.double(-1)
                                    #ele_etacut = cms.double(2.1)
                                    )
 
@@ -255,7 +259,7 @@ process.elefilter = cms.EDFilter('SimpleEleFilter',
 
 #---- Configure the output ROOT filename
 process.TFileService = cms.Service(
-	"TFileService", fileName=cms.string("myoutput.root"))
+	"TFileService", fileName=cms.string("myoutput_2ele2.root"))
 
 #---- Finally run everything!
 #---- Separation by * implies that processing order is important.
