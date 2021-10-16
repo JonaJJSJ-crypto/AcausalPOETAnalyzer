@@ -20,6 +20,14 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
+//classes to extract secvec information
+#include "SimDataFormats/CrossingFrame/interface/CrossingFrame.h"
+#include "SimDataFormats/CrossingFrame/interface/MixCollection.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingParticleFwd.h"
+#include "SimDataFormats/TrackingAnalysis/interface/TrackingVertexContainer.h"
+
+#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
+
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
@@ -62,6 +70,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenPart_py;
       std::vector<float> GenPart_pz;
       std::vector<int> GenPart_mompdgId;
+      std::vector<bool> GenPart_longlived;
 //Daugther store
       int numGenDau;
       std::vector<int> GenDau_status;
@@ -74,12 +83,24 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenDau_py;
       std::vector<float> GenDau_pz;
       std::vector<int> GenDau_mompdgId;
+      std::vector<bool> GenDau_longlived;
 
 };
 
 //
 // constants, enums and typedefs
 //
+
+edm::InputTag trackingTruth;
+typedef edm::RefVector< std::vector<TrackingParticle> > TrackingParticleContainer;
+typedef std::vector<TrackingParticle>                   TrackingParticleCollection;
+
+typedef TrackingParticleRefVector::iterator               tp_iterator;
+typedef TrackingParticle::g4t_iterator                   g4t_iterator;
+typedef TrackingParticle::genp_iterator                 genp_iterator;
+typedef TrackingVertex::genv_iterator                   genv_iterator;
+typedef TrackingVertex::g4v_iterator                     g4v_iterator;
+
 
 //
 // static data member definitions
@@ -91,9 +112,10 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
 
 GenParticleAnalyzer::GenParticleAnalyzer(const edm::ParameterSet& iConfig):
 particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
-
 {
 //now do what ever initialization is needed
+	trackingTruth = iConfig.getUntrackedParameter<edm::InputTag>("trackingTruth");
+
 	edm::Service<TFileService> fs;
 	mtree = fs->make<TTree>("Events", "Events");
 
@@ -119,6 +141,9 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_pz")->SetTitle("generator particle z coordinate of momentum vector");
     mtree->Branch("GenPart_status",&GenPart_status);
     mtree->GetBranch("GenPart_status")->SetTitle("Particle status. 1=stable");
+    mtree->Branch("GenPart_longlived",&GenPart_longlived);
+    mtree->GetBranch("GenPart_longlived")->SetTitle("Boolean if the particle is long lived");
+
 
     mtree->Branch("numGenDau",&numGenDau);
     mtree->GetBranch("numGenDau")->SetTitle("number of generator particles");
@@ -142,6 +167,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenDau_pz")->SetTitle("generator particle z coordinate of momentum vector");
     mtree->Branch("GenDau_status",&GenDau_status);
     mtree->GetBranch("GenDau_status")->SetTitle("Particle status. 1=stable");
+    mtree->Branch("GenDau_longlived",&GenDau_longlived);
+    mtree->GetBranch("GenDau_longlived")->SetTitle("Boolean if the daugther is long lived");
 
 }
 
@@ -174,6 +201,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenPart_py.clear();
    GenPart_pz.clear();
    GenPart_status.clear();
+   GenPart_longlived.clear();
 
    numGenDau=0;
    GenDau_pt.clear();
@@ -186,6 +214,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenDau_py.clear();
    GenDau_pz.clear();
    GenDau_status.clear();
+   GenDau_longlived.clear();
 
    Handle<reco::GenParticleCollection> gens;
    iEvent.getByLabel("genParticles", gens);
@@ -225,8 +254,9 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_px.push_back(itGenPart->px());
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
+		  GenPart_longlived.push_back(itGenPart->longLived());
 		  if(abs(itGenPart->pdgId())!=556)GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
-      else GenPart_mompdgId.push_back(0);
+		  else GenPart_mompdgId.push_back(23);
 		  //Daugther store
 		  int n = itGenPart->numberOfDaughters();
 		  numGenDau=n;
@@ -242,11 +272,51 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   	GenDau_py.push_back(d->py());
                   	GenDau_pz.push_back(d->pz());
                   	GenDau_mompdgId.push_back(itGenPart->pdgId());
+			GenPart_longlived.push_back(d->longLived());
+			//cout<<d->pdgId()<<' '<<d->longLived()<<endl;
 			}
+		  //if(itGenPart->pdgId()==556)cout<<"\n\n"<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
+		  //cout<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
+		  //cout<<itGenPart->pdgId()<<' '<<itGenPart->longLived()<<endl;
+
                 }
                }
         }
   }
+
+////////////////////////////////////////SecVec from HepMC//////////////////////////////////////
+
+/*  Handle<TrackingParticleCollection> mergedPH;
+  Handle<TrackingVertexCollection>   mergedVH;
+
+  iEvent.getByLabel(trackingTruth, mergedPH);
+  iEvent.getByLabel(trackingTruth, mergedVH);
+
+    cout << endl << "Dumping merged vertices: " << endl;
+    for (TrackingVertexCollection::const_iterator iVertex = mergedVH->begin(); iVertex != mergedVH->end(); ++iVertex) 
+    {
+      cout << endl << iVertex->eventId().event();
+      cout << "Daughters of this vertex:" << endl;
+      for (tp_iterator iTrack = iVertex->daughterTracks_begin(); iTrack != iVertex->daughterTracks_end(); ++iTrack) 
+        cout << **iTrack;
+    }
+    cout << endl;
+  
+    cout << endl << "Dumping only merged tracks: " << std::endl;
+    for (TrackingParticleCollection::const_iterator iTrack = mergedPH->begin(); iTrack != mergedPH->end(); ++iTrack)
+        if (iTrack->g4Tracks().size() > 1){
+	  for(TrackingParticle::genp_iterator hepT = iTrack->genParticle_begin(); hepT != iTrack->genParticle_end(); ++hepT)
+	  cout<< (*hepT)->momentum().m()<<endl;
+	}  
+    cout << endl << "Dump of merged tracks: " << endl;
+    //int k=0;
+    for (TrackingParticleCollection::const_iterator iTrack = mergedPH->begin(); iTrack != mergedPH->end(); ++iTrack){
+	cout<<*iTrack<<endl;
+	if(iTrack->pdgId()==11 && k<2){
+	  cout << iTrack->vertex() << ' '<< iTrack->p4() << endl;
+	  k++;
+	}
+    }*/
 
   mtree->Fill();
   return;

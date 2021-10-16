@@ -114,6 +114,7 @@ private:
   std::vector<float> secvec_deltaR1;
   std::vector<float> secvec_deltaR2;
   std::vector<int> electron_Bsecvec;//best match for electron sec vec
+  std::vector<int> electron_BdR;//best match delta R for electron sec vec
   std::vector<int> electron_secN;//# of printed electrons in Secvert
   std::vector<float> electron_deltaRsim;
   std::vector<float> electron_deltaR1sim;
@@ -122,6 +123,15 @@ private:
   std::vector<float> electron_deltaR1true;
   std::vector<float> electron_deltaR2true;
   std::vector<float> Zjet_pt;
+  std::vector<float> Bsp_x;
+  std::vector<float> Bsp_y;
+  std::vector<float> Bsp_z;
+  std::vector<float> Bsp_sigmaz;
+  std::vector<float> Bsp_dxdz;
+  std::vector<float> Bsp_dydz;
+  std::vector<float> Bsp_widthx;                        
+  std::vector<float> Bsp_widthy;
+  std::vector<math::XYZPoint> electron_superclusterpos;
 };
 
 //
@@ -225,6 +235,8 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_deltaR2")->SetTitle("2nd track deltaR");
   mtree->Branch("electron_Bsecvec",&electron_Bsecvec);
   mtree->GetBranch("electron_Bsecvec")->SetTitle("best match electrons for secondary vertex");
+  mtree->Branch("electron_BdR",&electron_BdR);
+  mtree->GetBranch("electron_BdR")->SetTitle("best match delta R electrons for secondary vertex");
   mtree->Branch("electron_secN",&electron_secN);
   mtree->GetBranch("electron_secN")->SetTitle("# electrons for secondary vertex");
   mtree->Branch("electron_deltaRsim",&electron_deltaRsim);
@@ -241,6 +253,23 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_deltaR2true")->SetTitle("2 Electron deltaRtrue");
   mtree->Branch("Zjet_pt",&Zjet_pt);
   mtree->GetBranch("Zjet_pt")->SetTitle("Z daugthers pt");
+  mtree->Branch("Bsp_x",&Bsp_x);
+  mtree->GetBranch("Bsp_x")->SetTitle("vertex Beamspot position x (mm)");
+  mtree->Branch("Bsp_y",&Bsp_y);
+  mtree->GetBranch("Bsp_y")->SetTitle("vertex Beamspot position y (mm)");
+  mtree->Branch("Bsp_z",&Bsp_z);
+  mtree->GetBranch("Bsp_z")->SetTitle("vertex Beamspot position z (mm)");
+  mtree->Branch("Bsp_sigmaz",&Bsp_sigmaz);
+  mtree->GetBranch("Bsp_sigmaz")->SetTitle("vertex Beamspot sigma z (mm)");
+  mtree->Branch("Bsp_dxdz",&Bsp_dxdz);
+  mtree->GetBranch("Bsp_dxdz")->SetTitle("vertex Beamspot dxdz (mm)");
+  mtree->Branch("Bsp_dydz",&Bsp_dydz);
+  mtree->GetBranch("Bsp_dydz")->SetTitle("vertex Beamspot position dydz (mm)");
+  mtree->Branch("Bsp_widthx",&Bsp_widthx);
+  mtree->GetBranch("Bsp_widthx")->SetTitle("vertex Beamspot width x (mm)");
+  mtree->Branch("electron_superclusterpos",&electron_superclusterpos);
+  mtree->GetBranch("Bsp_electron_superclusterpos")->SetTitle("Electron supercluster 3D position (mm)");
+
 
 }
 
@@ -330,6 +359,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_deltaR1.clear();
   secvec_deltaR2.clear();
   electron_Bsecvec.clear();
+  electron_BdR.clear();
   electron_secN.clear();
   electron_deltaRsim.clear();
   electron_deltaR1sim.clear();
@@ -338,12 +368,22 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_deltaR1true.clear();
   electron_deltaR2true.clear();
   Zjet_pt.clear();
+  Bsp_x.clear();
+  Bsp_y.clear();
+  Bsp_z.clear();
+  Bsp_sigmaz.clear();
+  Bsp_dxdz.clear();
+  Bsp_dydz.clear();
+  Bsp_widthx.clear();
+  Bsp_widthy.clear();
+  electron_superclusterpos.clear();
 
   if(myelectrons.isValid()){
     // get the number of electrons in the event
     //numelectron=myelectrons->size();
     //cout<<"No.Ele: "<<numelectron<<endl;
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
+     if(itElec->pt()>-1){
       numelectron++;//Here get actual number of electrons
 
       int missing_hits = itElec->gsfTrack()->trackerExpectedHitsInner().numberOfHits()-itElec->gsfTrack()->hitPattern().numberOfHits();
@@ -413,7 +453,17 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_dz.push_back(trk->dz(pv));
       electron_dxyError.push_back(trk->d0Error());
       electron_dzError.push_back(trk->dzError());
+	Bsp_x.push_back(beamspot.x0());
+  	Bsp_y.push_back(beamspot.y0());
+  	Bsp_z.push_back(beamspot.z0());
+  	Bsp_sigmaz.push_back(beamspot.sigmaZ());
+  	Bsp_dxdz.push_back(beamspot.dxdz());
+  	Bsp_dydz.push_back(beamspot.dydz());
+  	Bsp_widthx.push_back(beamspot.BeamWidthX());
+  	Bsp_widthy.push_back(beamspot.BeamWidthY());
+	electron_superclusterpos.push_back(itElec->superClusterPosition());
 
+     }//fin if pt elec
     }
 /////////////////////////////////////Best Gen particle match//////////////////////////////////
 if(!isData){
@@ -435,6 +485,7 @@ if(!isData){
 
    for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
    {
+    if(itElec1->pt()>-1){
      float saveDR=100;
      int idg=-1; //identity gen particle
      for(auto g=genElec.begin(); g!=genElec.end(); g++)
@@ -458,7 +509,7 @@ if(!isData){
       	genelec_ch.push_back(g->charge());
 	genelec_DRscore.push_back(deltaR(g->p4(),itElec1->p4()));
      }
-
+    }//fin If pt elec
    }
 
 }
@@ -499,6 +550,7 @@ for(size_t x=0; x!=myelectrons->size();x++){identyTrack[x]=-1;}
 int k=0;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 {
+ 
  if(itElec1->pt()>20)
  {
   int j=0;
@@ -516,6 +568,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   }
  }
  k++;
+ electron_Bsecvec.push_back(saveDR); 
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
 //fin identifier
