@@ -18,6 +18,9 @@ echo "Process:" $PROCESS
 FILE=${PROCESS}.lhe
 echo "File:" $FILE
 
+MBIDXFILE=CMS_MonteCarlo2012_TuneZ2star_8TeV-pythia6_GEN-SIM_START50_V13-v3_file_index.txt
+echo "Min Bias index file: " $MBIDXFILE
+
 EVTS=$3
 echo "Events: " $EVTS
 
@@ -54,10 +57,13 @@ HLTCONFIG=${CMSSW_BASE}/src/AODgeneration/config/hltLW.py
 RECOCONFIG=${CMSSW_BASE}/src/AODgeneration/config/recoLW.py
 
 LHEFILE=${CMSSW_BASE}/src/AODgeneration/data/${FILE}
+MBFILES=${CMSSW_BASE}/src/AODgeneration/data/${MBIDXFILE}
 
 echo "gen config:" $GENCONFIG
 echo "hlt config:" $HLTCONFIG
 echo "reco config:" $RECOCONFIG
+
+echo "minbias index file:" $MBFILES
 
 echo "Hostname:" `hostname`
 
@@ -114,6 +120,11 @@ xrdcp -f gensimLW.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/gensimLW_
 
 # Print hlt config
 cat $HLTCONFIG_COPY
+
+# Modify the hlt config to deal with pileup sim
+THEMBFILE=`shuf -n 1 ${MBFILES}`
+echo "Min bias file: " ${THEMBFILE} 
+sed -i -e "s,root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12/MinBias_TuneZ2star_8TeV-pythia6/GEN-SIM/START50_V13-v3/0002/FEF2F4CC-0E6A-E111-96F6-0030487F1C57.root,${THEMBFILE},g" $HLTCONFIG_COPY
 
 # Run CMSSW hlt config
 cmsRun $HLTCONFIG_COPY
