@@ -131,7 +131,9 @@ private:
   std::vector<float> Bsp_dydz;
   std::vector<float> Bsp_widthx;                        
   std::vector<float> Bsp_widthy;
-  std::vector<math::XYZPoint> electron_superclusterpos;
+  std::vector<float> electron_superclusterposx;
+  std::vector<float> electron_superclusterposy;
+  std::vector<float> electron_superclusterposz;
 };
 
 //
@@ -267,9 +269,12 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("Bsp_dydz")->SetTitle("vertex Beamspot position dydz (mm)");
   mtree->Branch("Bsp_widthx",&Bsp_widthx);
   mtree->GetBranch("Bsp_widthx")->SetTitle("vertex Beamspot width x (mm)");
-  mtree->Branch("electron_superclusterpos",&electron_superclusterpos);
-  mtree->GetBranch("Bsp_electron_superclusterpos")->SetTitle("Electron supercluster 3D position (mm)");
-
+  mtree->Branch("electron_superclusterposx",&electron_superclusterposx);
+  mtree->GetBranch("electron_superclusterposx")->SetTitle("Electron supercluster x position (mm)");
+  mtree->Branch("electron_superclusterposy",&electron_superclusterposy);
+  mtree->GetBranch("electron_superclusterposy")->SetTitle("Electron supercluster y position (mm)");
+  mtree->Branch("electron_superclusterposz",&electron_superclusterposz);
+  mtree->GetBranch("electron_superclusterposz")->SetTitle("Electron supercluster z position (mm)");
 
 }
 
@@ -376,7 +381,9 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   Bsp_dydz.clear();
   Bsp_widthx.clear();
   Bsp_widthy.clear();
-  electron_superclusterpos.clear();
+  electron_superclusterposx.clear();
+  electron_superclusterposy.clear();
+  electron_superclusterposz.clear();
 
   if(myelectrons.isValid()){
     // get the number of electrons in the event
@@ -461,7 +468,10 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   	Bsp_dydz.push_back(beamspot.dydz());
   	Bsp_widthx.push_back(beamspot.BeamWidthX());
   	Bsp_widthy.push_back(beamspot.BeamWidthY());
-	electron_superclusterpos.push_back(itElec->superClusterPosition());
+	electron_superclusterposx.push_back(itElec->superClusterPosition().x());
+        electron_superclusterposy.push_back(itElec->superClusterPosition().y());
+        electron_superclusterposz.push_back(itElec->superClusterPosition().z());
+
 
      }//fin if pt elec
     }
