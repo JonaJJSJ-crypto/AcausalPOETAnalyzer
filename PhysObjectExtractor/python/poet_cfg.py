@@ -210,7 +210,9 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 				      #---- Collect particles with specific "pdgid:status"
                                       #---- Check PDG ID in the PDG.
 				      #---- if 0:0, collect them all
-				      input_particle = cms.vstring("1:11","0:23","1:-11","2:556","2:-556")
+				      input_particle = cms.vstring("1:11","0:23","1:-11","2:556","2:-556"),
+				      trackingTruth = cms.untracked.InputTag('mergedtruth', 'MergedTrackTruth')
+
 				      )
 
 process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
@@ -246,11 +248,11 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #                                   )
 process.elefilter = cms.EDFilter('SimpleEleFilter',
                                   InputCollectionElectrons = cms.InputTag("gsfElectrons"),
-				  InputCollectionTracks = cms.InputTag("generalTracks"),
+				  #InputCollectionTracks = cms.InputTag("generalTracks"),
                                    ele_minpt = cms.double(10),
 				   ele_num = cms.double(2),
-				   trk_minpt = cms.double(-1),
-				   trk_num = cms.double(-1)
+				   #trk_minpt = cms.double(-1),
+				   #trk_num = cms.double(-1)
                                    #ele_etacut = cms.double(2.1)
                                    )
 

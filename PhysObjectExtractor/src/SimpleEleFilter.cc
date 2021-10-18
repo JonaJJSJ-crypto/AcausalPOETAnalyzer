@@ -41,18 +41,6 @@ a tau of certain characteristics, which are mostly configurable.
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
-/*//classes to extract Muon information
-#include "DataFormats/MuonReco/interface/Muon.h"
-#include "DataFormats/MuonReco/interface/MuonFwd.h"
-#include "DataFormats/MuonReco/interface/MuonSelectors.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-
-//classes to extract tau information
-#include "DataFormats/TauReco/interface/PFTau.h"
-#include "DataFormats/TauReco/interface/PFTauFwd.h"
-#include "DataFormats/TauReco/interface/PFTauDiscriminator.h"*/
-
 //
 // class declaration
 //
@@ -76,11 +64,11 @@ class SimpleEleFilter : public edm::EDFilter {
 
       // ----------member data ---------------------------
   edm::InputTag electronInput;
-  edm::InputTag trackInput;
+  //edm::InputTag trackInput;
   double ele_minpt_;
   double ele_num_;
-  double trk_minpt_;
-  double trk_num_;
+  //double trk_minpt_;
+  //double trk_num_;
   //double ele_etacut_;
 
 
@@ -101,11 +89,11 @@ SimpleEleFilter::SimpleEleFilter(const edm::ParameterSet& iConfig)
 {
    //now do what ever initialization is needed
   electronInput = iConfig.getParameter<edm::InputTag>("InputCollectionElectrons");
-  trackInput = iConfig.getParameter<edm::InputTag>("InputCollectionTracks");
+  //trackInput = iConfig.getParameter<edm::InputTag>("InputCollectionTracks");
   ele_minpt_ = iConfig.getParameter<double>("ele_minpt");
   ele_num_ = iConfig.getParameter<double>("ele_num");
-  trk_minpt_ = iConfig.getParameter<double>("trk_minpt");
-  trk_num_ = iConfig.getParameter<double>("trk_num");  
+  //trk_minpt_ = iConfig.getParameter<double>("trk_minpt");
+  //trk_num_ = iConfig.getParameter<double>("trk_num");
   //ele_etacut_ = iConfig.getParameter<double>("ele_etacut");
   //ele_mindxy_ = iConfig.getParameter<double>("ele_mindxy")
 }
@@ -140,13 +128,13 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   Handle<reco::VertexCollection> vertices;
   iEvent.getByLabel(InputTag("offlinePrimaryVertices"), vertices);
 
-  Handle<reco::TrackCollection> tracks;
-   iEvent.getByLabel(trackInput, tracks);
+  //Handle<reco::TrackCollection> tracks;
+   //iEvent.getByLabel(trackInput, tracks);
 
   bool isGoodElectron =false;
-  bool isGoodTrack =false;
+  //bool isGoodTrack =false;
   int GoodEleCount = 0;
-  int GoodTrkCount = 0;
+  //int GoodTrkCount = 0;
   if(myelectrons.isValid()){
     //math::XYZPoint pv(vertices->begin()->position());
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
@@ -157,7 +145,7 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     if(GoodEleCount>ele_num_-1)isGoodElectron=true;
   }
-  if(tracks.isValid()){
+  /*if(tracks.isValid()){
     for (reco::TrackCollection::const_iterator iTrack = tracks->begin(); iTrack != tracks->end(); ++iTrack){
       if(iTrack->pt()>trk_minpt_){
         GoodTrkCount++;
@@ -167,8 +155,9 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   //isGoodTrack=true;
   //isGoodElectron=true;
-   return isGoodElectron*isGoodTrack;
-}
+   return isGoodElectron*isGoodTrack;*///descomentar en caso de necesitar tracks
+   return isGoodElectron;
+ }
 
 // ------------ method called once each job just before starting event loop  ------------
 void
