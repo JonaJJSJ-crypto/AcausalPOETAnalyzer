@@ -213,7 +213,6 @@ process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 				      #---- if 0:pdg, collect particle for all status
 				      input_particle = cms.vstring("1:11","0:23","1:-11","2:556","2:-556","0:24","0:-24"),
 				      trackingTruth = cms.untracked.InputTag('mergedtruth', 'MergedTrackTruth')
-
 				      )
 
 process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
