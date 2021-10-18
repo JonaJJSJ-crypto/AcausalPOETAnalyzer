@@ -209,8 +209,8 @@ process.mytracks= cms.EDAnalyzer('TrackAnalyzer')
 process.mygenparticle= cms.EDAnalyzer('GenParticleAnalyzer',
 				      #---- Collect particles with specific "pdgid:status"
                                       #---- Check PDG ID in the PDG.
-				      #---- if 0:0, collect them all
-				      input_particle = cms.vstring("1:11","0:23","1:-11","2:556","2:-556"),
+				      #---- if 0:pdg, collect particle for all status
+				      input_particle = cms.vstring("1:11","0:23","1:-11","2:556","2:-556","0:24","0:-24"),
 				      trackingTruth = cms.untracked.InputTag('mergedtruth', 'MergedTrackTruth')
 
 				      )
