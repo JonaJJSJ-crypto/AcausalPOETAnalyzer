@@ -71,6 +71,8 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenPart_pz;
       std::vector<int> GenPart_mompdgId;
       std::vector<bool> GenPart_longlived;
+      std::vector<math::XYZPoint> GenPart_vertex;
+
 //Daugther store
       int numGenDau;
       std::vector<int> GenDau_status;
@@ -143,7 +145,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_status")->SetTitle("Particle status. 1=stable");
     mtree->Branch("GenPart_longlived",&GenPart_longlived);
     mtree->GetBranch("GenPart_longlived")->SetTitle("Boolean if the particle is long lived");
-
+    mtree->Branch("GenPart_vertex",&GenPart_vertex);
+    mtree->GetBranch("GenPart_vertex")->SetTitle("vertex of the generated particle");
 
     mtree->Branch("numGenDau",&numGenDau);
     mtree->GetBranch("numGenDau")->SetTitle("number of generator particles");
@@ -202,6 +205,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenPart_pz.clear();
    GenPart_status.clear();
    GenPart_longlived.clear();
+   GenPart_vertex.clear();
 
    numGenDau=0;
    GenDau_pt.clear();
@@ -255,6 +259,9 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
 		  GenPart_longlived.push_back(itGenPart->longLived());
+                  GenPart_vertex.push_back(itGenPart->vertex());
+
+		  
 		  if(abs(itGenPart->pdgId())!=556)GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
 		  else GenPart_mompdgId.push_back(23);
 		  //Daugther store
