@@ -246,13 +246,22 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #                                   tau_minpt = cms.double(20),
 #                                   tau_etacut = cms.double(2.3)
 #                                   )
+process.elefilter = cms.EDFilter('SimpleEleFilter',
+                                  InputCollectionElectrons = cms.InputTag("gsfElectrons"),
+				  #InputCollectionTracks = cms.InputTag("generalTracks"),
+                                   ele_minpt = cms.double(10),
+				   ele_num = cms.double(2),
+				   #trk_minpt = cms.double(-1),
+				   #trk_num = cms.double(-1)
+                                   #ele_etacut = cms.double(2.1)
+                                   )
 
 
 
 
 #---- Configure the output ROOT filename
 process.TFileService = cms.Service(
-	"TFileService", fileName=cms.string("myoutput.root"))
+	"TFileService", fileName=cms.string("myoutput_2ele2.root"))
 
 #---- Finally run everything!
 #---- Separation by * implies that processing order is important.
@@ -261,5 +270,5 @@ process.TFileService = cms.Service(
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
 else:
-	if isData: process.p = cms.Path(process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
-	else: process.p = cms.Path(process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
+	if isData: process.p = cms.Path(process.elefilter + process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
+	else: process.p = cms.Path(process.elefilter + process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
