@@ -116,7 +116,7 @@ cat $GENCONFIG_COPY
 cmsRun $GENCONFIG_COPY 
 
 # Copy output file
-xrdcp -f gensimLW.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/gensimLW_${PROCESS}_${ID}.root
+#xrdcp -f gensimLW.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/gensimLW_${PROCESS}_${ID}.root
 
 # Print hlt config
 cat $HLTCONFIG_COPY
@@ -130,7 +130,7 @@ sed -i -e "s,root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12/
 cmsRun $HLTCONFIG_COPY
 
 #Copy output file
-xrdcp -f hltLW.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/hltLW_${PROCESS}_${ID}.root
+#xrdcp -f hltLW.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/hltLW_${PROCESS}_${ID}.root
 
 # Print reco config
 cat $RECOCONFIG_COPY
@@ -142,7 +142,7 @@ cmsRun $RECOCONFIG_COPY
 xrdcp -f recoLW.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/recoLW_${PROCESS}_${ID}.root
 
 #Copy output file
-xrdcp -f histProbFunction.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/histProbFunction_${PROCESS}_${ID}.root
+#xrdcp -f histProbFunction.root root://eosuser.cern.ch/${OUTPUT_DIR}/${PROCESS}/histProbFunction_${PROCESS}_${ID}.root
 
 #Erase leftovers
 rm gensimLW.root
