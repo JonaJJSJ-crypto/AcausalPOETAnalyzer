@@ -39,6 +39,12 @@
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
+//pf
+#include "FWCore/Utilities/interface/Exception.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/ParticleFlowReco/interface/PFBlock.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
+
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
@@ -103,6 +109,8 @@ private:
   std::vector<float> jet_phi;
   std::vector<float> jet_ch;
   std::vector<float> jet_mass;
+  std::vector<math::XYZPointF> const_pos;
+  std::vector<float> const_pt;
   std::vector<float> genjet_e;
   std::vector<float> genjet_pt;
   std::vector<float> genjet_px;
@@ -191,6 +199,10 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("jet_ch")->SetTitle("Jet Charge");
   mtree->Branch("jet_mass",&jet_mass);
   mtree->GetBranch("jet_mass")->SetTitle("Jet Mass");
+  mtree->Branch("const_pos",&const_pos);
+  mtree->GetBranch("const_pos")->SetTitle("jet's most energetic constituent entrance at ecal");
+  mtree->Branch("const_pt",&const_pt);
+  mtree->GetBranch("const_pt")->SetTitle("jet's most energetic constituent pt");
   mtree->Branch("numberZjet",&numZjet);
   mtree->GetBranch("numberZjet")->SetTitle("Number of first Z daugthers");
   mtree->Branch("genjet_e",&genjet_e);
@@ -392,6 +404,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   jet_phi.clear();
   jet_ch.clear();
   jet_mass.clear();
+  const_pos.clear();
+  const_pt.clear();
   numZjet = 0;
   genjet_e.clear();
   genjet_pt.clear();
@@ -519,7 +533,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       
       if (ptscale*corr*uncorrJet.pt() >= min_pt){
-	
+	  const_pos.push_back(itjet->getPFConstituent(0)->positionAtECALEntrance());
+	  const_pt.push_back(itjet->getPFConstituent(0)->pt());
 	jet_e.push_back(itjet->energy());
 	jet_pt.push_back(itjet->pt());
 	jet_px.push_back(itjet->px());
@@ -529,6 +544,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	jet_phi.push_back(itjet->phi());
 	jet_ch.push_back(itjet->charge());
 	jet_mass.push_back(itjet->mass());
+	
 	if(btags.isValid() && (itjet - myjets->begin()) < btags->size()) {
 	  jet_btag.push_back(btags->operator[](itjet - myjets->begin()).second);
 	}
@@ -538,6 +554,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	corr_jet_ptDown.push_back(ptscale*corrDown*uncorrJet.pt());
 	corr_jet_ptSmearUp.push_back(ptscale_up*corr*uncorrJet.pt());
 	corr_jet_ptSmearDown.push_back(ptscale_down*corr*uncorrJet.pt());
+
 ///////////////////Z dau to jet identifier/////////////////////////////
 	if(!isData){
      	  float saveDR=100;
@@ -567,6 +584,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  }
 	}
 ///////////////////Z dau to jet identifier///////////////////
+
 	if (!isData){
 	  SF = 1;
 	  SFu = 1;
