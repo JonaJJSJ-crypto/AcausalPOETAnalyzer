@@ -18,7 +18,7 @@ echo "Process:" $PROCESS
 FILE=$3
 echo "File:" $FILE
 
-ISDATA=True
+ISDATA=False
 DOPAT=False
 
 EOS_HOME=/eos/user/e/ecarrera
