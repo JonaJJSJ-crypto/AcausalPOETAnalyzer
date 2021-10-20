@@ -51,8 +51,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #---- python cernopendata-client download-files --recid 6004 --filter-range 1-1
 #---- For running over larger number of files, comment out this section and use/uncomment the FileUtils infrastructure below
 if isData:
-	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoublePhoton/AOD/22Jan2013-v1/20000/0013EBD3-FA6C-E211-A1DF-00261894384A.root
-'
+	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/Run2012B/DoublePhoton/AOD/22Jan2013-v1/20000/0013EBD3-FA6C-E211-A1DF-00261894384A.root'
 else:
 	sourceFile='root://eospublic.cern.ch//eos/opendata/cms/MonteCarlo2012/Summer12_DR53X/TTbar_8TeV-Madspin_aMCatNLO-herwig/AODSIM/PU_S10_START53_V19-v2/00000/000A9D3F-CE4C-E311-84F8-001E673969D2.root'
 process.source = cms.Source("PoolSource",
