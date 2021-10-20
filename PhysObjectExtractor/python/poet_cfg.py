@@ -261,7 +261,7 @@ process.elefilter = cms.EDFilter('SimpleEleFilter',
 
 #---- Configure the output ROOT filename
 process.TFileService = cms.Service(
-	"TFileService", fileName=cms.string("myoutput_2ele2.root"))
+	"TFileService", fileName=cms.string("myoutput.root"))
 
 #---- Finally run everything!
 #---- Separation by * implies that processing order is important.
@@ -272,3 +272,4 @@ if doPat:
 else:
 	if isData: process.p = cms.Path(process.elefilter + process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
 	else: process.p = cms.Path(process.elefilter + process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
+
