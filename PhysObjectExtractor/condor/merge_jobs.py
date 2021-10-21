@@ -8,6 +8,8 @@ import os
 import sys
 import re
 
+THEJOBDIR = "joblaunch"
+
 def parse_arguments():
     if not len(sys.argv) == 2:
         raise Exception("Run with './merge_jobs.py path/to/input/directory'.")
@@ -77,11 +79,21 @@ def main(input_dir):
     """
 
     if missing_file:
-        path_list = "arguments.txt"
-        out_list = open(path_list, "w")
+        thejobdir = THEJOBDIR+"/"+process+"/"
+        argsfile = "arguments.txt"
+        failedargsfile = "failedarguments.txt"
+        thefailedargsfile = thejobdir+failedargsfile
+        out_list = open(thefailedargsfile, "w")
         for a in argument_list:
             out_list.write(a+"\n")
-        raise Exception("Found missing files, wrote arguments list to %s."%(path_list))
+
+        #also create a new failedjob.jdl                                                                                                                                                             
+        thejdlfile =  thejobdir+"job.jdl"
+        thefailedjdlfile = thejobdir+"failedjob.jdl"
+        os.system("cp "+thejdlfile+" "+thefailedjdlfile)
+        thesed = 'sed -i -e "s,'+argsfile+','+failedargsfile+',g" '+thefailedjdlfile
+        os.system(thesed)    
+        raise Exception("Found missing files, wrote arguments list to %s."%(thefailedargsfile))
 
 
     #https://root-forum.cern.ch/t/moving-ttrees-into-tdirectories/25386/8
