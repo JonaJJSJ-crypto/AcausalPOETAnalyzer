@@ -7,12 +7,14 @@ mkdir -p $BASE_PATH
 
 # Set processes
 PROCESSES=( \
-    Run2012B_DoublePhoton \
-    Run2012C_DoublePhoton \
-    LWSM200DnR \
-    LWSM300DnR \
-    LWSM400DnR \
-    LWSM500DnR \
+#    Run2012B_DoublePhoton \
+#    Run2012C_DoublePhoton \
+    DYJetsToLL \
+#    TTbar \
+#    LWSM200DnR \
+#    LWSM300DnR \
+#    LWSM400DnR \
+#    LWSM500DnR \
     )
 
 # Create JDL files and job directories
@@ -26,6 +28,6 @@ THIS_PWD=$PWD
 for PROCESS in ${PROCESSES[@]}
 do
     cd $BASE_PATH/$PROCESS
-    condor_submit job.jdl
+#    condor_submit job.jdl
     cd $THIS_PWD
 done
