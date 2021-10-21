@@ -1,0 +1,1 @@
+split -l 3000 arguments.txt arguments -a 1 --additional-suffix=".txt"
