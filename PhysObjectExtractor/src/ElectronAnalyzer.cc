@@ -676,12 +676,12 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
              else{secvec_dispR.push_back(totDR);}
 
              //DeltaR identification
-             float DeltaRPrima = deltaR(itElec1->eta(),itElec1->phi(),itTrack2->eta(),itTrack2->phi());
+             float DeltaRPrima = deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
 	     //cout<<"DeltaR: "<<DeltaRPrima<<'\n'<<endl;
 
              secvec_deltaR.push_back(DeltaRPrima);
-             if(i==0){secvec_deltaR1.push_back(DeltaRPrima);}
-             else if(i==1){secvec_deltaR2.push_back(DeltaRPrima);}
+             secvec_deltaR1.push_back(deltaR(itElec1->eta(),itElec1->phi(),itTrack2->eta(),itTrack2->phi()));
+             secvec_deltaR2.push_back(deltaR(itElec1->eta(),itElec1->phi(),itTrack3->eta(),itTrack3->phi()));
 
 	     //find best secvec
              if(identyTrack[k-1]==i)
