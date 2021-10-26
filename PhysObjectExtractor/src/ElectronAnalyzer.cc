@@ -578,8 +578,8 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   }
  }
  k++;
- electron_Bsecvec.push_back(saveDR);
- //electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
+ //electron_Bsecvec.push_back(saveDR);
+ electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
 //fin identifier
 
