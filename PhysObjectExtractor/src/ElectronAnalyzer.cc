@@ -129,7 +129,7 @@ private:
   std::vector<float> Bsp_sigmaz;
   std::vector<float> Bsp_dxdz;
   std::vector<float> Bsp_dydz;
-  std::vector<float> Bsp_widthx;
+  std::vector<float> Bsp_widthx;                        
   std::vector<float> Bsp_widthy;
   std::vector<float> electron_superclusterposx;
   std::vector<float> electron_superclusterposy;
@@ -560,7 +560,7 @@ for(size_t x=0; x!=myelectrons->size();x++){identyTrack[x]=-1;}
 int k=0;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 {
-
+ 
  if(itElec1->pt()>20)
  {
   int j=0;
@@ -578,7 +578,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   }
  }
  k++;
- //electron_Bsecvec.push_back(saveDR);
+ electron_BdR.push_back(saveDR); 
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
 //fin identifier

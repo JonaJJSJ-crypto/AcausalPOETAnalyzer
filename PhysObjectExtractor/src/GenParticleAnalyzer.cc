@@ -71,7 +71,10 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenPart_pz;
       std::vector<int> GenPart_mompdgId;
       std::vector<bool> GenPart_longlived;
-      std::vector<math::XYZPoint> GenPart_vertex;
+      std::vector<float> GenPart_vx;
+      std::vector<float> GenPart_vy;
+      std::vector<float> GenPart_vz;
+
 
 //Daugther store
       int numGenDau;
@@ -86,6 +89,9 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenDau_pz;
       std::vector<int> GenDau_mompdgId;
       std::vector<bool> GenDau_longlived;
+      std::vector<float> GenDau_vx;
+      std::vector<float> GenDau_vy;
+      std::vector<float> GenDau_vz;
 
 };
 
@@ -145,8 +151,12 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_status")->SetTitle("Particle status. 1=stable");
     mtree->Branch("GenPart_longlived",&GenPart_longlived);
     mtree->GetBranch("GenPart_longlived")->SetTitle("Boolean if the particle is long lived");
-    mtree->Branch("GenPart_vertex",&GenPart_vertex);
-    mtree->GetBranch("GenPart_vertex")->SetTitle("vertex of the generated particle");
+    mtree->Branch("GenPart_vx",&GenPart_vx);
+    mtree->GetBranch("GenPart_vx")->SetTitle("vertex X postion of the generated particle");
+    mtree->Branch("GenPart_vy",&GenPart_vy);
+    mtree->GetBranch("GenPart_vy")->SetTitle("vertex Y postion of the generated particle");
+    mtree->Branch("GenPart_vz",&GenPart_vz);
+    mtree->GetBranch("GenPart_vz")->SetTitle("vertex Z postion of the generated particle");
 
     mtree->Branch("numGenDau",&numGenDau);
     mtree->GetBranch("numGenDau")->SetTitle("number of generator particles");
@@ -172,6 +182,12 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenDau_status")->SetTitle("Particle status. 1=stable");
     mtree->Branch("GenDau_longlived",&GenDau_longlived);
     mtree->GetBranch("GenDau_longlived")->SetTitle("Boolean if the daugther is long lived");
+    mtree->Branch("GenDau_vx",&GenDau_vx);
+    mtree->GetBranch("GenDau_vx")->SetTitle("vertex X postion of the daughter generated particle");
+    mtree->Branch("GenDau_vy",&GenDau_vy);
+    mtree->GetBranch("GenDau_vy")->SetTitle("vertex Y postion of the daughter generated particle");
+    mtree->Branch("GenDau_vz",&GenDau_vz);
+    mtree->GetBranch("GenDau_vz")->SetTitle("vertex Z postion of the daughter generated particle");
 
 }
 
@@ -205,7 +221,9 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenPart_pz.clear();
    GenPart_status.clear();
    GenPart_longlived.clear();
-   GenPart_vertex.clear();
+   GenPart_vx.clear();
+   GenPart_vy.clear();
+   GenPart_vz.clear();
 
    numGenDau=0;
    GenDau_pt.clear();
@@ -219,6 +237,9 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenDau_pz.clear();
    GenDau_status.clear();
    GenDau_longlived.clear();
+   GenDau_vx.clear();
+   GenDau_vy.clear();
+   GenDau_vz.clear();
 
    Handle<reco::GenParticleCollection> gens;
    iEvent.getByLabel("genParticles", gens);
@@ -259,9 +280,11 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
 		  GenPart_longlived.push_back(itGenPart->longLived());
-                  GenPart_vertex.push_back(itGenPart->vertex());
+                  GenPart_vx.push_back(itGenPart->vertex().x());
+                  GenPart_vy.push_back(itGenPart->vertex().y());
+                  GenPart_vz.push_back(itGenPart->vertex().z());
 
-		  
+
 		  if(abs(itGenPart->pdgId())!=556)GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
 		  else GenPart_mompdgId.push_back(23);
 		  //Daugther store
@@ -279,7 +302,10 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   	GenDau_py.push_back(d->py());
                   	GenDau_pz.push_back(d->pz());
                   	GenDau_mompdgId.push_back(itGenPart->pdgId());
-			GenPart_longlived.push_back(d->longLived());
+			              GenPart_longlived.push_back(d->longLived());
+                    GenDau_vx.push_back(d->vertex().x());
+                    GenDau_vy.push_back(d->vertex().y());
+                    GenDau_vz.push_back(d->vertex().z());
 			//cout<<d->pdgId()<<' '<<d->longLived()<<endl;
 			}
 		  //if(itGenPart->pdgId()==556)cout<<"\n\n"<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
@@ -300,21 +326,21 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   iEvent.getByLabel(trackingTruth, mergedVH);
 
     cout << endl << "Dumping merged vertices: " << endl;
-    for (TrackingVertexCollection::const_iterator iVertex = mergedVH->begin(); iVertex != mergedVH->end(); ++iVertex) 
+    for (TrackingVertexCollection::const_iterator iVertex = mergedVH->begin(); iVertex != mergedVH->end(); ++iVertex)
     {
       cout << endl << iVertex->eventId().event();
       cout << "Daughters of this vertex:" << endl;
-      for (tp_iterator iTrack = iVertex->daughterTracks_begin(); iTrack != iVertex->daughterTracks_end(); ++iTrack) 
+      for (tp_iterator iTrack = iVertex->daughterTracks_begin(); iTrack != iVertex->daughterTracks_end(); ++iTrack)
         cout << **iTrack;
     }
     cout << endl;
-  
+
     cout << endl << "Dumping only merged tracks: " << std::endl;
     for (TrackingParticleCollection::const_iterator iTrack = mergedPH->begin(); iTrack != mergedPH->end(); ++iTrack)
         if (iTrack->g4Tracks().size() > 1){
 	  for(TrackingParticle::genp_iterator hepT = iTrack->genParticle_begin(); hepT != iTrack->genParticle_end(); ++hepT)
 	  cout<< (*hepT)->momentum().m()<<endl;
-	}  
+	}
     cout << endl << "Dump of merged tracks: " << endl;
     //int k=0;
     for (TrackingParticleCollection::const_iterator iTrack = mergedPH->begin(); iTrack != mergedPH->end(); ++iTrack){
