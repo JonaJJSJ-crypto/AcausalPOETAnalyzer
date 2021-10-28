@@ -7,9 +7,9 @@ import sys
 #Assuming each LW mass point has 150000 events, 
 # we set the number of jobs to 15000, so there are 10 events per job to complete 150000
 # we do not do 
-numJobs = 15000
+numJobs = 7500
 #This will be picked up automatically by job.sh: 
-evtsPerJob = 10
+evtsPerJob = 20
 #any number to start:
 theFirstRun = 200000
 
@@ -20,7 +20,7 @@ error = err/$(ProcId).$(ClusterID).err
 log = log/$(ProcId).$(ClusterID).log
 max_retries = 3
 RequestCpus = 1
-+MaxRuntime = 2700
++MaxRuntime = 3600
 queue arguments from arguments.txt\
 """
 

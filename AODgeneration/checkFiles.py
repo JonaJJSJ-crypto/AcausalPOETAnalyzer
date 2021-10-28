@@ -5,7 +5,7 @@ import sys
 
 THEEOSDIR = "/eos/home-e/ecarrera/lee-wick/signal/"
 THEJOBDIR = "joblaunch"
-NUMJOBS = 15000
+NUMJOBS = 7500
 GENTYPE = "gensimLW"
 HLTTYPE = "hltLW"
 RECOTYPE = "recoLW"

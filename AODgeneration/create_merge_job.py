@@ -10,7 +10,9 @@ import sys
 #ALSO IMPORTANT is to keep number of events under 6K per job, otherwise
 #with the file size limit, more than one file gets created and the extra ones
 #are not going to be copied. 6.5K events give approximately reaches the limit
-nlinesSplit = 375
+#For the orginal 200 point we had 15000 files (10 events per file), so we split with 375 per job (40 jobs with 3750 events per job)
+#For the rest we will have 7500 files (with 20 events per file), so we split with 150 per job (45 jobs with 3000 events per job)
+nlinesSplit = 150
 
 mergeDirName = "merged"
 
