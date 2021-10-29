@@ -301,7 +301,7 @@ void EventLoopAnalysisTemplate::analysis()
   Int_t histsize = sizeof(hists)/sizeof(hists[0]);
   Float_t pstmp;
 
-  for (Int_t j=0;j<histsize;++j){
+  for (Int_t j=0;j<6;++j){
 
     TString histname = TString(hists[j]->GetName());
     TString thelabel = histname(0,histname.First("_"));
@@ -309,7 +309,7 @@ void EventLoopAnalysisTemplate::analysis()
     //cout<<thevar<<'\n';
     pstmp=MinimalSelection(j);
     hists[j]->Fill(pstmp);
-    if(pstmp==0 && j==0){
+    if(pstmp==0 && j==1){
       Triggcount++;
       hists[6]->Fill(electron_pt->size());
       for (size_t i = 0; i < electron_pt->size(); i++) {
