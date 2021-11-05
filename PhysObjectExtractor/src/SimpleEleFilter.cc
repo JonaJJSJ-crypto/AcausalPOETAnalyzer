@@ -70,7 +70,9 @@ class SimpleEleFilter : public edm::EDFilter {
   edm::InputTag electronInput;
   //edm::InputTag trackInput;
   double ele_minpt_;
-  double ele_num_;
+  int ele_num_;
+  double jet_minpt_;
+  int jet_num_;
   //double trk_minpt_;
   //double trk_num_;
   //double ele_etacut_;
@@ -95,7 +97,9 @@ SimpleEleFilter::SimpleEleFilter(const edm::ParameterSet& iConfig)
   electronInput = iConfig.getParameter<edm::InputTag>("InputCollectionElectrons");
   //trackInput = iConfig.getParameter<edm::InputTag>("InputCollectionTracks");
   ele_minpt_ = iConfig.getParameter<double>("ele_minpt");
-  ele_num_ = iConfig.getParameter<double>("ele_num");
+  ele_num_ = iConfig.getParameter<int>("ele_num");
+  jet_minpt_ = iConfig.getParameter<double>("jet_minpt");
+  jet_num_ = iConfig.getParameter<int>("jet_num");
   //trk_minpt_ = iConfig.getParameter<double>("trk_minpt");
   //trk_num_ = iConfig.getParameter<double>("trk_num");
   //ele_etacut_ = iConfig.getParameter<double>("ele_etacut");
@@ -137,20 +141,20 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   bool isGoodElectron =false;
   bool isGoodJet =false;
-  bool isZ =false;
+  //bool isZ =false;
   //bool isGoodTrack =false;
   int GoodEleCount = 0;
   int GoodJetCount = 0;
-  int ZCount = 0;
+  //int ZCount = 0;
   //int GoodTrkCount = 0;
-  reco::Particle::LorentzVector dijetp4;
-  float m=0;
+  //reco::Particle::LorentzVector dijetp4;
+  //float m=0;
 
   if(myelectrons.isValid()){
     //math::XYZPoint pv(vertices->begin()->position());
     for (reco::GsfElectronCollection::const_iterator itElec=myelectrons->begin(); itElec!=myelectrons->end(); ++itElec){
       auto trk = itElec->gsfTrack();
-      if(itElec->pt()>20){
+      if(itElec->pt()>ele_minpt_){
 	GoodEleCount++;
       }
     }
@@ -158,24 +162,24 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
   if(myjets.isValid()){
     for (reco::PFJetCollection::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
-	if(itjet->pt()>20){
+	if(itjet->pt()>jet_minpt_){
 	  GoodJetCount++;
 	}
 	//chekeando masa invariante Z
-	for (reco::PFJetCollection::const_iterator itjet2=myjets->begin(); itjet2!=myjets->end(); ++itjet2){
+	/*for (reco::PFJetCollection::const_iterator itjet2=myjets->begin(); itjet2!=myjets->end(); ++itjet2){
 	  if(itjet->pt()>20 &&itjet->pt()>20){
             dijetp4=itjet->p4()+itjet2->p4();
 	    m=dijetp4.mass();
 	    if(m>70 && m<150) ZCount++;
 	  }
-    	}
+    	}*/
 
     }
-    if(GoodJetCount>=4)isGoodJet=true;
-    if(ZCount >= 1) {
+    if(GoodJetCount>=jet_num_)isGoodJet=true;
+    /*if(ZCount >= 1) {
 	isZ=true;
 	cout<<ZCount<<endl;
-    } 
+    }*/ 
   }
   /*if(tracks.isValid()){
     for (reco::TrackCollection::const_iterator iTrack = tracks->begin(); iTrack != tracks->end(); ++iTrack){
@@ -189,7 +193,7 @@ SimpleEleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   //isGoodElectron=true;
    return isGoodElectron*isGoodTrack;*///descomentar en caso de necesitar tracks
    //if(isGoodElectron*isGoodJet) cout<<GoodEleCount<<' '<<GoodJetCount<<endl;
-   return isGoodElectron*isGoodJet*isZ;
+   return isGoodElectron*isGoodJet;
  }
 
 // ------------ method called once each job just before starting event loop  ------------
