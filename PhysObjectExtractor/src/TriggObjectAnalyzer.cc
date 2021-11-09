@@ -21,6 +21,10 @@
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
 
+//class to trigger result
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "FWCore/Common/interface/TriggerNames.h"
+
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
@@ -45,13 +49,13 @@ class TriggObjectAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-      
+
       //declare de filter (module) of the trigger
       std::string filterName_;
-      
+
       // ----------member data ---------------------------
-      
-      
+
+
       TTree *mtree;
       int numtrigobj; //number of trigger objects in the event
       std::vector<float> trigobj_e;
@@ -82,8 +86,8 @@ TriggObjectAnalyzer::TriggObjectAnalyzer(const edm::ParameterSet& iConfig)
 	filterName_ = iConfig.getParameter<std::string>("filterName");
 	edm::Service<TFileService> fs;
 	mtree = fs->make<TTree>("Events", "Events");
-	
-	
+
+
 	mtree->Branch("numbertrigobj",&numtrigobj);
 	mtree->Branch("trigobj_e",&trigobj_e);
 	mtree->Branch("trigobj_pt",&trigobj_pt);
@@ -92,7 +96,7 @@ TriggObjectAnalyzer::TriggObjectAnalyzer(const edm::ParameterSet& iConfig)
 	mtree->Branch("trigobj_pz",&trigobj_pz);
 	mtree->Branch("trigobj_eta",&trigobj_eta);
 	mtree->Branch("trigobj_phi",&trigobj_phi);
-	
+
 }
 
 
@@ -112,11 +116,17 @@ TriggObjectAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 {
    using namespace edm;
    using namespace std;
-   
+
    InputTag trigEventTag("hltTriggerSummaryAOD","","HLT"); //make sure have correct process on MC
    //data process=HLT, MC depends, Spring11 is REDIGI311X
    Handle<trigger::TriggerEvent> mytrigEvent;
    iEvent.getByLabel(trigEventTag,mytrigEvent);
+
+   Handle<edm::TriggerResults> trigResults;
+   edm::InputTag trigResultsTag("TriggerResults","","HLT");
+   iEvent.getByLabel(trigResultsTag,trigResults);
+
+   const edm::TriggerNames& trigNames = iEvent.triggerNames(*trigResults);
 
    numtrigobj = 0;
    trigobj_e.clear();
@@ -127,7 +137,59 @@ TriggObjectAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    trigobj_eta.clear();
    trigobj_phi.clear();
 
-    trigger::size_type filterIndex = mytrigEvent->filterIndex(edm::InputTag(filterName_,"",trigEventTag.process()));
+   string toFind[4] = {"HLT_Photon36_R9Id85_Photon22_R9Id85_v","HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v", "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v","HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v"};
+
+/*** Photon AOD files (used for the electron analysis part) may have any of the above triggers
+ * and may also differ from file to file. In the loop below we check which one it is.
+ * **/
+
+int triggerFound=9999;
+for(int j = 0; j < 4; j++){
+for (unsigned int i = 0; i< trigNames.size(); i++)
+{
+
+
+	std::string trig = trigNames.triggerName(i);
+	if ( trig.find(toFind[j]) !=std::string::npos ){
+
+		int wr = trigResults->wasrun(trigNames.triggerIndex(trig));
+		int acc = trigResults->accept(trigNames.triggerIndex(trig));
+		int err = trigResults->error(trigNames.triggerIndex(trig));
+		if(wr == 1 && acc == 1 && err == 0 ){
+			triggerFound=j;
+			i = trigNames.size();
+			j = 4;
+			}
+		}
+
+	}
+}
+/*** Here we check if the trigger was activated and store the result
+ * in the variable passTrig. This is a requirement for the analysis.
+ * ***/
+//cout<<triggerFound<<endl;
+string filterName = "none";
+
+if (triggerFound == 0)
+{
+	filterName = "hltEG22R9Id85DoubleLastFilterUnseeded";
+}
+else if (triggerFound == 1)
+{
+	filterName = "hltPhoton36R9Id85Photon22CaloId10Iso50EgammaDoubleLegCombLastFilter";
+}
+else if (triggerFound ==2)
+{
+	filterName = "hltPhoton36CaloId10Iso50Photon22R9Id85EgammaDoubleLegCombLastFilter";
+}
+else
+{
+        filterName = "hltEG22CaloId10Iso50TrackIsoDoubleLastFilterUnseeded";
+}
+
+std::string e_filterName(filterName);
+
+    trigger::size_type filterIndex = mytrigEvent->filterIndex(edm::InputTag(e_filterName,"",trigEventTag.process()));
     if(filterIndex<mytrigEvent->sizeFilters()){
     const trigger::Keys& trigKeys = mytrigEvent->filterKeys(filterIndex);
     const trigger::TriggerObjectCollection & trigObjColl(mytrigEvent->getObjects());
@@ -149,10 +211,10 @@ TriggObjectAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 	    numtrigobj=numtrigobj+1;
     }
   }//end filter size check
-  
+
   mtree->Fill();
   return;
-  
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
