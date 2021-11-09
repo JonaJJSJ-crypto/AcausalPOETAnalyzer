@@ -127,6 +127,12 @@ private:
   std::vector<float> corr_jet_ptDown;
   std::vector<float> corr_jet_ptSmearUp;
   std::vector<float> corr_jet_ptSmearDown;
+  std::vector<int> NConstituents;
+  std::vector<float> NeutralHF;
+  std::vector<float> ChargedEMF;
+  std::vector<float> ChargedHF;
+  std::vector<float> ChargedMult;
+
   float btagWeight;
   float btagWeightUp;
   float btagWeightDn;
@@ -243,6 +249,17 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("btag_WeightUp")->SetTitle("B-Tag Up event weight");
   mtree->Branch("btag_WeightDn", &btagWeightDn);
   mtree->GetBranch("btag_WeightDn")->SetTitle("B-Tag Down event weight");
+  mtree->Branch("NConstituents", &NConstituents);
+  mtree->GetBranch("NConstituents")->SetTitle("Jet # of constituents");
+  mtree->Branch("NeutralHF", &NeutralHF);
+  mtree->GetBranch("NeutralHF")->SetTitle("Jet neutral hadron energy fraction");
+  mtree->Branch("ChargedEMF", &ChargedEMF);
+  mtree->GetBranch("ChargedEMF")->SetTitle("Jet charged EM energy fraction");
+  mtree->Branch("ChargedHF", &ChargedHF);
+  mtree->GetBranch("ChargedHF")->SetTitle("Jet charged hadron energy fraction");
+  mtree->Branch("ChargedMult", &ChargedMult);
+  mtree->GetBranch("ChargedMult")->SetTitle("Jet charged multiplicity");
+
 }
 
 JetAnalyzer::~JetAnalyzer()
@@ -423,6 +440,11 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   corr_jet_ptDown.clear();
   corr_jet_ptSmearUp.clear();
   corr_jet_ptSmearDown.clear();
+  NConstituents.clear();
+  NeutralHF.clear();
+  ChargedEMF.clear();
+  ChargedHF.clear();
+  ChargedMult.clear();
 
 
 ///////////////////Z dau to jet identifier/////////////////////////////
@@ -533,8 +555,16 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
       
       if (ptscale*corr*uncorrJet.pt() >= min_pt){
+	/*cout<<itjet->getPFConstituents().size()<<' '<<itjet->chargedMultiplicity()<<' '<<itjet->chargedHadronEnergyFraction();
+	cout<<' '<<itjet->neutralHadronEnergyFraction()<<' '<<itjet->chargedEmEnergy()<<' '<<itjet->neutralEmEnergy()<<endl;*/
 	  const_pos.push_back(itjet->getPFConstituent(0)->positionAtECALEntrance());
 	  const_pt.push_back(itjet->getPFConstituent(0)->pt());
+  	NConstituents.push_back(itjet->getPFConstituents().size());
+  	NeutralHF.push_back(itjet->neutralHadronEnergyFraction());
+  	ChargedEMF.push_back(itjet->chargedEmEnergy()/itjet->neutralEmEnergy());
+  	ChargedHF.push_back(itjet->chargedHadronEnergyFraction());
+  	ChargedMult.push_back(itjet->chargedMultiplicity());
+
 	jet_e.push_back(itjet->energy());
 	jet_pt.push_back(itjet->pt());
 	jet_px.push_back(itjet->px());

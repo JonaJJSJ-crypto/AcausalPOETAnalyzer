@@ -98,6 +98,12 @@ private:
   std::vector<bool> electron_isLoose;
   std::vector<bool> electron_isMedium;
   std::vector<bool> electron_isTight;
+  std::vector<bool> trk_isHQ;
+  std::vector<float> trk_NChi2;
+  std::vector<float> trk_d0;
+  std::vector<float> trk_d0E;
+  std::vector<float> trk_dZ;
+  std::vector<float> trk_dZE;
   std::vector<float> electron_dxy;
   std::vector<float> electron_dz;
   std::vector<float> electron_dxyError;
@@ -129,7 +135,7 @@ private:
   std::vector<float> Bsp_sigmaz;
   std::vector<float> Bsp_dxdz;
   std::vector<float> Bsp_dydz;
-  std::vector<float> Bsp_widthx;                        
+  std::vector<float> Bsp_widthx;
   std::vector<float> Bsp_widthy;
   std::vector<float> electron_superclusterposx;
   std::vector<float> electron_superclusterposy;
@@ -205,6 +211,18 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_isMedium")->SetTitle("electron tagged medium");
   mtree->Branch("electron_isTight",&electron_isTight);
   mtree->GetBranch("electron_isTight")->SetTitle("electron tagged tight");
+  mtree->Branch("trk_isHQ",&trk_isHQ);
+  mtree->GetBranch("trk_isHQ")->SetTitle("electron track tagged HighQuality");
+  mtree->Branch("trk_NChi2",&trk_NChi2);
+  mtree->GetBranch("trk_NChi2")->SetTitle("electron track Normalized Chi squared (mm)");
+  mtree->Branch("trk_d0",&trk_d0);
+  mtree->GetBranch("trk_d0")->SetTitle("electron track transverse distance to beamspot (mm)");
+  mtree->Branch("trk_d0E",&trk_d0E);
+  mtree->GetBranch("trk_d0E")->SetTitle("electron track transverse distance to beamspot error (mm)");
+  mtree->Branch("trk_dZ",&trk_dZ);
+  mtree->GetBranch("trk_dZ")->SetTitle("electron track longitudinal distance to beamspot (mm)");
+  mtree->Branch("trk_dZE",&trk_dZE);
+  mtree->GetBranch("trk_dZE")->SetTitle("electron track longitudinal distance to beamspot error (mm)");
   mtree->Branch("electron_dxy",&electron_dxy);
   mtree->GetBranch("electron_dxy")->SetTitle("electron transverse plane impact parameter (mm)");
   mtree->Branch("electron_dz",&electron_dz);
@@ -348,6 +366,12 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_isLoose.clear();
   electron_isMedium.clear();
   electron_isTight.clear();
+  trk_isHQ.clear();
+  trk_NChi2.clear();
+  trk_d0.clear();
+  trk_d0E.clear();
+  trk_dZ.clear();
+  trk_dZE.clear();
   electron_dxy.clear();
   electron_dz.clear();
   electron_dxyError.clear();
@@ -443,7 +467,8 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  }
 	}
       }
-	//cout<<"Correspondance:"<<itElec->p4()<<endl;
+      //cout<<trk->quality(reco::Track::highPurity)<<endl;
+      //cout<<"Correspondance:"<<itElec->p4()<<endl;
       electron_e.push_back(itElec->energy());
       electron_pt.push_back(itElec->pt());
       electron_px.push_back(itElec->px());
@@ -553,14 +578,15 @@ if(!isData){
   float zerr;
 
 //iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
-float saveDR=100;
+float saveDR;
 int identyTrack[myelectrons->size()];
 for(size_t x=0; x!=myelectrons->size();x++){identyTrack[x]=-1;}
 
 int k=0;
+//cout<<"size "<<myelectrons->size()<<endl;
 for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 {
- 
+ saveDR=100;
  if(itElec1->pt()>20)
  {
   int j=0;
@@ -568,6 +594,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   {
      if(itTrack1->pt()>20)
      {
+        //cout<<"check\n";
 	float DR_ET = deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
 	if(DR_ET<saveDR){
 	  saveDR=DR_ET;
@@ -577,10 +604,45 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
      }
   }
  }
+
+
+//////////////////////////////////////////////////////////////////////
+
+ if(identyTrack[k]!=-1){
+  //cout<<"   "<<identyTrack[k]<<' '<<itElec1->pt()<<' ';
+  int j=0;
+  for(TrackCollection::const_iterator itTrack1 = tracks->begin(); itTrack1 != tracks->end(); ++itTrack1)
+  {
+     if(itTrack1->pt()>20)
+     {
+      	if(j==identyTrack[k]){
+	   /*auto trk1=itElec1->gsfTrack();
+	   auto DRtest=deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
+	   cout<<trk1->pt()<<' '<<j<<' '<< itTrack1->pt()<<' '<<DRtest<<endl;
+	   cout<<"   "<<trk1->quality(reco::Track::highPurity)<<' '<<itTrack1->quality(reco::Track::highPurity);
+	   cout<<' '<<itTrack1->normalizedChi2()<<' ';
+	   cout<<itTrack1->dxy(beamspot.position())<<' '<<itTrack1->dz(beamspot.position())<<' '<<itTrack1->d0Error()<<endl;*/
+	   trk_isHQ.push_back(itTrack1->quality(reco::Track::highPurity));
+           trk_NChi2.push_back(itTrack1->normalizedChi2());
+	   trk_d0.push_back(itTrack1->dxy(beamspot.position()));
+	   trk_d0E.push_back(itTrack1->d0Error());
+           trk_dZ.push_back(itTrack1->dz(beamspot.position()));
+           trk_dZE.push_back(itTrack1->dzError());
+
+	}
+	j++;
+     }
+  }
+ }
  k++;
- electron_BdR.push_back(saveDR); 
+ electron_BdR.push_back(saveDR);
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
+
+////////////////////////////////////////////////////////////////////
+
+
+
 //fin identifier
 
 vector<float> savedisp (myelectrons->size());
@@ -591,6 +653,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        ++itTrack1)
 {
   if( itTrack1->pt()>20 ){
+    //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
     int	j=0;
     for(TrackCollection::const_iterator itTrack2 = tracks->begin();
        itTrack2 != tracks->end();
@@ -686,6 +749,8 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 	     //find best secvec
              if(identyTrack[k-1]==i)
 	     {
+		/*cout<<itTrack1->quality(reco::Track::highPurity)<<"\n ";
+                cout<<itTrack1->pt()<<' '<<itElec1->pt()<<' '<<itElec1->eta()<<endl;*/
 		if(dispR > savedisp.at(k-1))
 		{
 		  savedisp.at(k-1)=dispR;
