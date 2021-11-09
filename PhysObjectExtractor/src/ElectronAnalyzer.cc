@@ -104,6 +104,7 @@ private:
   std::vector<float> trk_d0E;
   std::vector<float> trk_dZ;
   std::vector<float> trk_dZE;
+  std::vector<int> trk_Nlayer;
   std::vector<float> electron_dxy;
   std::vector<float> electron_dz;
   std::vector<float> electron_dxyError;
@@ -135,7 +136,7 @@ private:
   std::vector<float> Bsp_sigmaz;
   std::vector<float> Bsp_dxdz;
   std::vector<float> Bsp_dydz;
-  std::vector<float> Bsp_widthx;
+  std::vector<float> Bsp_widthx;                        
   std::vector<float> Bsp_widthy;
   std::vector<float> electron_superclusterposx;
   std::vector<float> electron_superclusterposy;
@@ -223,6 +224,8 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("trk_dZ")->SetTitle("electron track longitudinal distance to beamspot (mm)");
   mtree->Branch("trk_dZE",&trk_dZE);
   mtree->GetBranch("trk_dZE")->SetTitle("electron track longitudinal distance to beamspot error (mm)");
+  mtree->Branch("trk_Nlayer",&trk_Nlayer);
+  mtree->GetBranch("trk_Nlayer")->SetTitle("electron track number of hit layers (mm)");
   mtree->Branch("electron_dxy",&electron_dxy);
   mtree->GetBranch("electron_dxy")->SetTitle("electron transverse plane impact parameter (mm)");
   mtree->Branch("electron_dz",&electron_dz);
@@ -372,6 +375,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   trk_d0E.clear();
   trk_dZ.clear();
   trk_dZE.clear();
+  trk_Nlayer.clear();
   electron_dxy.clear();
   electron_dz.clear();
   electron_dxyError.clear();
@@ -467,7 +471,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  }
 	}
       }
-      //cout<<trk->quality(reco::Track::highPurity)<<endl;
+      //cout<<trk->quality(reco::Track::highPurity)<<endl;	
       //cout<<"Correspondance:"<<itElec->p4()<<endl;
       electron_e.push_back(itElec->energy());
       electron_pt.push_back(itElec->pt());
@@ -628,6 +632,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
 	   trk_d0E.push_back(itTrack1->d0Error());
            trk_dZ.push_back(itTrack1->dz(beamspot.position()));
            trk_dZE.push_back(itTrack1->dzError());
+	   trk_Nlayer.push_back(itTrack1->hitPattern().trackerLayersWithMeasurement());
 
 	}
 	j++;
@@ -635,7 +640,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   }
  }
  k++;
- electron_BdR.push_back(saveDR);
+ electron_BdR.push_back(saveDR); 
  electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
 
