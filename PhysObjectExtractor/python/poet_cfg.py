@@ -230,8 +230,8 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #---- This filter, however, does know about prescales
 #---- A previous trigger study would be needed to cut hard on a given trigger or set of triggers
 #---- The filter can be added to the path below if needed but is not applied by default
-#process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-#process.hltHighLevel.HLTPaths = cms.vstring('HLT_IsoMu17_eta2p1_LooseIsoPFTau20_v*')
+process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
+process.hltHighLevel.HLTPaths = cms.vstring('HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50')
 
 
 

@@ -556,12 +556,12 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       if (ptscale*corr*uncorrJet.pt() >= min_pt){
 	/*cout<<itjet->getPFConstituents().size()<<' '<<itjet->chargedMultiplicity()<<' '<<itjet->chargedHadronEnergyFraction();
-	cout<<' '<<itjet->neutralHadronEnergyFraction()<<' '<<itjet->chargedEmEnergy()<<' '<<itjet->neutralEmEnergy()<<endl;*/
+	cout<<' '<<itjet->neutralHadronEnergyFraction()<<' '<<itjet->chargedEmEnergyFraction()<<endl;*/
 	  const_pos.push_back(itjet->getPFConstituent(0)->positionAtECALEntrance());
 	  const_pt.push_back(itjet->getPFConstituent(0)->pt());
   	NConstituents.push_back(itjet->getPFConstituents().size());
   	NeutralHF.push_back(itjet->neutralHadronEnergyFraction());
-  	ChargedEMF.push_back(itjet->chargedEmEnergy()/itjet->neutralEmEnergy());
+  	ChargedEMF.push_back(itjet->chargedEmEnergyFraction());
   	ChargedHF.push_back(itjet->chargedHadronEnergyFraction());
   	ChargedMult.push_back(itjet->chargedMultiplicity());
 

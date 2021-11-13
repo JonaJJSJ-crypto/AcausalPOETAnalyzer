@@ -39,6 +39,11 @@
 #include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 
+//Trigg object match
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
@@ -68,6 +73,7 @@ private:
 
   //declare the input tag for GsfElectronCollection
   edm::InputTag electronInput;
+  std::string filterName_;
 
   // ----------member data ---------------------------
   bool isData;
@@ -82,6 +88,12 @@ private:
   std::vector<float> electron_px;
   std::vector<float> electron_py;
   std::vector<float> electron_pz;
+  std::vector<float> electron_vx;
+  std::vector<float> electron_vy;
+  std::vector<float> electron_vz;
+  //std::vector<float> electron_vxerr;
+  //std::vector<float> electron_vyerr;
+  //std::vector<float> electron_vzerr;
   std::vector<float> electron_eta;
   std::vector<float> electron_phi;
   std::vector<float> electron_ch;
@@ -115,12 +127,19 @@ private:
   std::vector<float> secvec_poserrorx;
   std::vector<float> secvec_poserrory;
   std::vector<float> secvec_poserrorz;
-  std::vector<float> secvec_disp;
-  std::vector<float> secvec_dispR;
-  std::vector<float> secvec_deltaR;
+  std::vector<int> secvec_eleTag;
+  //std::vector<float> secvec_disp;
+  //std::vector<float> secvec_dispR;
+  //std::vector<float> secvec_deltaR;
+  std::vector<float> secvec_phi;
+  std::vector<float> secvec_eta;
   std::vector<float> secvec_deltaR1;
+  std::vector<float> secvec_phi1;
+  std::vector<float> secvec_eta1;
   std::vector<float> secvec_deltaR2;
-  std::vector<int> electron_Bsecvec;//best match for electron sec vec
+  std::vector<float> secvec_phi2;
+  std::vector<float> secvec_eta2;
+  //std::vector<int> electron_Bsecvec;//best match for electron sec vec
   std::vector<int> electron_BdR;//best match delta R for electron sec vec
   std::vector<int> electron_secN;//# of printed electrons in Secvert
   std::vector<float> electron_deltaRsim;
@@ -136,7 +155,7 @@ private:
   std::vector<float> Bsp_sigmaz;
   std::vector<float> Bsp_dxdz;
   std::vector<float> Bsp_dydz;
-  std::vector<float> Bsp_widthx;                        
+  std::vector<float> Bsp_widthx;
   std::vector<float> Bsp_widthy;
   std::vector<float> electron_superclusterposx;
   std::vector<float> electron_superclusterposy;
@@ -160,6 +179,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
 //now do what ever initialization is needed
   isData = iConfig.getParameter<bool>("isData");
   electronInput = iConfig.getParameter<edm::InputTag>("InputCollection");
+  //filterName_ = iConfig.getParameter<std::string>("filterName");
   edm::Service<TFileService> fs;
   mtree = fs->make<TTree>("Events", "Events");
 
@@ -180,6 +200,18 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_py")->SetTitle("electron momentum y-component");
   mtree->Branch("electron_pz",&electron_pz);
   mtree->GetBranch("electron_pz")->SetTitle("electron momentum z-component");
+  mtree->Branch("electron_vx",&electron_vx);
+  mtree->GetBranch("electron_vx")->SetTitle("electron vertex x-component");
+  mtree->Branch("electron_vy",&electron_vy);
+  mtree->GetBranch("electron_vy")->SetTitle("electron vertex y-component");
+  mtree->Branch("electron_vz",&electron_vz);
+  mtree->GetBranch("electron_vz")->SetTitle("electron vertex z-component");
+  //mtree->Branch("electron_vxerr",&electron_vxerr);
+  //mtree->GetBranch("electron_vxerr")->SetTitle("electron vertex x-component error");
+  //mtree->Branch("electron_vyerr",&electron_vyerr);
+  //mtree->GetBranch("electron_vyerr")->SetTitle("electron vertex y-component error");
+  //mtree->Branch("electron_vzerr",&electron_vzerr);
+  //mtree->GetBranch("electron_vzerr")->SetTitle("electron vertex z-component error");
   mtree->Branch("electron_eta",&electron_eta);
   mtree->GetBranch("electron_eta")->SetTitle("electron pseudorapidity");
   mtree->Branch("electron_phi",&electron_phi);
@@ -246,18 +278,30 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_poserrory")->SetTitle("secvec position y error (mm)");
   mtree->Branch("secvec_poserrorz",&secvec_poserrorz);
   mtree->GetBranch("secvec_poserrorz")->SetTitle("secvec position z error (mm)");
-  mtree->Branch("secvec_disp",&secvec_disp);
-  mtree->GetBranch("secvec_disp")->SetTitle("secvec displacement from primary vertex (mm)");
-  mtree->Branch("secvec_dispR",&secvec_dispR);
-  mtree->GetBranch("secvec_dispR")->SetTitle("secvec weigthed displacement from primary vertex");
-  mtree->Branch("secvec_deltaR",&secvec_deltaR);
-  mtree->GetBranch("secvec_deltaR")->SetTitle("1-2tracks deltaR");
+  //mtree->Branch("secvec_disp",&secvec_disp);
+  //mtree->GetBranch("secvec_disp")->SetTitle("secvec displacement from primary vertex (mm)");
+  //mtree->Branch("secvec_dispR",&secvec_dispR);
+  //mtree->GetBranch("secvec_dispR")->SetTitle("secvec weigthed displacement from primary vertex");
+  //mtree->Branch("secvec_deltaR",&secvec_deltaR);
+  //mtree->GetBranch("secvec_deltaR")->SetTitle("1-2tracks deltaR");
+  mtree->Branch("secvec_phi",&secvec_phi);
+  mtree->GetBranch("secvec_phi")->SetTitle("Track seed phi");
+  mtree->Branch("secvec_eta",&secvec_eta);
+  mtree->GetBranch("secvec_eta")->SetTitle("Track seed eta");
   mtree->Branch("secvec_deltaR1",&secvec_deltaR1);
   mtree->GetBranch("secvec_deltaR1")->SetTitle("1st track deltaR");
+  mtree->Branch("secvec_phi1",&secvec_phi1);
+  mtree->GetBranch("secvec_phi1")->SetTitle("Track 1 phi");
+  mtree->Branch("secvec_eta1",&secvec_eta1);
+  mtree->GetBranch("secvec_eta1")->SetTitle("Track 1 eta");
   mtree->Branch("secvec_deltaR2",&secvec_deltaR2);
   mtree->GetBranch("secvec_deltaR2")->SetTitle("2nd track deltaR");
-  mtree->Branch("electron_Bsecvec",&electron_Bsecvec);
-  mtree->GetBranch("electron_Bsecvec")->SetTitle("best match electrons for secondary vertex");
+  mtree->Branch("secvec_phi2",&secvec_phi2);
+  mtree->GetBranch("secvec_phi2")->SetTitle("Track 2 phi");
+  mtree->Branch("secvec_eta2",&secvec_eta2);
+  mtree->GetBranch("secvec_eta2")->SetTitle("Track 2 eta");
+  /*mtree->Branch("electron_Bsecvec",&electron_Bsecvec);
+  mtree->GetBranch("electron_Bsecvec")->SetTitle("best match electrons for secondary vertex");*/
   mtree->Branch("electron_BdR",&electron_BdR);
   mtree->GetBranch("electron_BdR")->SetTitle("best match delta R electrons for secondary vertex");
   mtree->Branch("electron_secN",&electron_secN);
@@ -296,7 +340,6 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_superclusterposy")->SetTitle("Electron supercluster y position (mm)");
   mtree->Branch("electron_superclusterposz",&electron_superclusterposz);
   mtree->GetBranch("electron_superclusterposz")->SetTitle("Electron supercluster z position (mm)");
-
 }
 
 ElectronAnalyzer::~ElectronAnalyzer()
@@ -353,6 +396,12 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_px.clear();
   electron_py.clear();
   electron_pz.clear();
+  electron_vx.clear();
+  electron_vy.clear();
+  electron_vz.clear();
+  //electron_vxerr.clear();
+  //electron_vyerr.clear();
+  //electron_vzerr.clear();
   electron_eta.clear();
   electron_phi.clear();
   electron_ch.clear();
@@ -386,12 +435,19 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_poserrorx.clear();
   secvec_poserrory.clear();
   secvec_poserrorz.clear();
-  secvec_disp.clear();
-  secvec_dispR.clear();
-  secvec_deltaR.clear();
+
+  //secvec_disp.clear();
+  //secvec_dispR.clear();
+  //secvec_deltaR.clear();
+  secvec_phi.clear();
+  secvec_eta.clear();
   secvec_deltaR1.clear();
+  secvec_phi1.clear();
+  secvec_eta1.clear();
   secvec_deltaR2.clear();
-  electron_Bsecvec.clear();
+  secvec_phi2.clear();
+  secvec_eta2.clear();
+  //electron_Bsecvec.clear();
   electron_BdR.clear();
   electron_secN.clear();
   electron_deltaRsim.clear();
@@ -471,13 +527,19 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
 	  }
 	}
       }
-      //cout<<trk->quality(reco::Track::highPurity)<<endl;	
+      //cout<<trk->quality(reco::Track::highPurity)<<endl;
       //cout<<"Correspondance:"<<itElec->p4()<<endl;
       electron_e.push_back(itElec->energy());
       electron_pt.push_back(itElec->pt());
       electron_px.push_back(itElec->px());
       electron_py.push_back(itElec->py());
       electron_pz.push_back(itElec->pz());
+      electron_px.push_back(itElec->vx());
+      electron_py.push_back(itElec->vy());
+      electron_pz.push_back(itElec->vz());
+      //electron_px.push_back(itElec->vxerror());
+      //electron_py.push_back(itElec->vyerror());
+      //electron_pz.push_back(itElec->pzvzerror());
       electron_eta.push_back(itElec->eta());
       electron_phi.push_back(itElec->phi());
       electron_ch.push_back(itElec->charge());
@@ -568,10 +630,10 @@ if(!isData){
       iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
       vector<TransientTrack> t_tks = (*theB).build(tks);
 //////////////////////secondary reco////////////////
-   Handle<PFJetCollection> myjets;
-   iEvent.getByLabel("ak5PFJets", myjets);
+   //Handle<PFJetCollection> myjets;//jets collection if neede
+   //iEvent.getByLabel("ak5PFJets", myjets);
 //displacement variables
-  float dispx;
+  /*float dispx;
   float dispy;
   float dispz;
   float disp;
@@ -579,7 +641,7 @@ if(!isData){
   float dispR;
   float xerr;
   float yerr;
-  float zerr;
+  float zerr;*/
 
 //iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
 float saveDR;
@@ -640,8 +702,8 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   }
  }
  k++;
- electron_BdR.push_back(saveDR); 
- electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
+ electron_BdR.push_back(saveDR);
+ //electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -657,7 +719,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        itTrack1 != tracks->end();
        ++itTrack1)
 {
-  if( itTrack1->pt()>20 ){
+  if( itTrack1->pt()>20 && itTrack1->quality(reco::Track::highPurity) ){
     //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
     int	j=0;
     for(TrackCollection::const_iterator itTrack2 = tracks->begin();
@@ -665,11 +727,11 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        ++itTrack2)
        {
 
-       if( itTrack2->pt()>10 ){
+       if( itTrack2->pt()>10 && itTrack2->quality(reco::Track::highPurity) ){
 	int j3=0;
 	for(TrackCollection::const_iterator itTrack3 = tracks->begin(); itTrack3 != tracks->end(); ++itTrack3)
   	{
-	if( itTrack3->pt()>10 ){
+	if( itTrack3->pt()>10 && itTrack3->quality(reco::Track::highPurity) ){
 
          KalmanVertexFitter fitter;
          vector<TransientTrack> trackVec;
@@ -694,7 +756,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
            TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
 	   trackVec.clear();
 
-        int k=0;
+        //int k=0;//este K es para el numero de desplazamientos
        if(myVertex.isValid()){
 	numsecvec++;
 	secvec_posx.push_back(myVertex.position().x());
@@ -703,7 +765,20 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
   	secvec_poserrorx.push_back(myVertex.positionError().cxx());
   	secvec_poserrory.push_back(myVertex.positionError().cyy());
   	secvec_poserrorz.push_back(myVertex.positionError().czz());
-	for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
+    //Delta R entre Track1 Y electron en electron_BdR
+    secvec_phi.push_back(itTrack1->phi());
+    secvec_eta.push_back(itTrack1->eta());
+    secvec_deltaR1.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack2->eta(),itTrack2->phi()));
+    secvec_phi1.push_back(itTrack2->phi());
+    secvec_phi2.push_back(itTrack2->eta());
+    secvec_deltaR2.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack3->eta(),itTrack3->phi()));
+    secvec_phi2.push_back(itTrack3->phi());
+    secvec_eta2.push_back(itTrack3->eta());
+    for (size_t k=0; k<myelectrons->size(); k++){
+      if(identyTrack[k]==i) secvec_eleTag.push_back(k);
+      else secvec_eleTag.push_back(-1);
+    }
+	/*for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
 	{
              numdisp++;//total of secondary vertex disp per event
 	     k++;//# of saved disp per SecondaryVertex
@@ -731,7 +806,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
              float difz = (myVertex.position().z())/(sqrt((xerr*xerr)+(yerr*yerr)+(zerr*zerr)));
              float err  = sqrt(difx*difx*xerr+dify*dify*yerr+difz*difz*zerr);
 
-             disp= sqrt(dispx*dispx + dispy*dispy + dispz*dispz);
+            disp= sqrt(dispx*dispx + dispy*dispy + dispz*dispz);
              //cout<<"Displacement: "<<disp<<endl;
              dispR= sqrt(dispx*dispx + dispy*dispy + dispz*dispz)/err;
 	     //cout<<"Weigthed Displacement: "<<dispR<<'\n'<<endl;
@@ -754,16 +829,16 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
 	     //find best secvec
              if(identyTrack[k-1]==i)
 	     {
-		/*cout<<itTrack1->quality(reco::Track::highPurity)<<"\n ";
-                cout<<itTrack1->pt()<<' '<<itElec1->pt()<<' '<<itElec1->eta()<<endl;*/
-		if(dispR > savedisp.at(k-1))
-		{
-		  savedisp.at(k-1)=dispR;
-		  electron_Bsecvec.at(k-1)=numdisp;
-		}
+		//cout<<itTrack1->quality(reco::Track::highPurity)<<"\n ";
+                //cout<<itTrack1->pt()<<' '<<itElec1->pt()<<' '<<itElec1->eta()<<endl;
+    		if(dispR > savedisp.at(k-1))
+    		{
+    		  savedisp.at(k-1)=dispR;
+    		  electron_Bsecvec.at(k-1)=numdisp;
+    		}
 	     }
 
-	 }// for itElec
+	 }*/// for itElec
 
         }
 	}//nonequal Tracks condition 3-2 3-1
