@@ -69,6 +69,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenPart_px;
       std::vector<float> GenPart_py;
       std::vector<float> GenPart_pz;
+      std::vector<float> GenPart_e;
       std::vector<int> GenPart_mompdgId;
       std::vector<bool> GenPart_longlived;
       std::vector<float> GenPart_vx;
@@ -87,6 +88,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenDau_px;
       std::vector<float> GenDau_py;
       std::vector<float> GenDau_pz;
+      std::vector<float> GenDau_e;
       std::vector<int> GenDau_mompdgId;
       std::vector<bool> GenDau_longlived;
       std::vector<float> GenDau_vx;
@@ -147,6 +149,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_py")->SetTitle("generator particle y coordinate of momentum vector");
     mtree->Branch("GenPart_pz",&GenPart_pz);
     mtree->GetBranch("GenPart_pz")->SetTitle("generator particle z coordinate of momentum vector");
+    mtree->Branch("GenPart_e",&GenPart_e);
+    mtree->GetBranch("GenPart_e")->SetTitle("generator particle energy");
     mtree->Branch("GenPart_status",&GenPart_status);
     mtree->GetBranch("GenPart_status")->SetTitle("Particle status. 1=stable");
     mtree->Branch("GenPart_longlived",&GenPart_longlived);
@@ -178,6 +182,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenDau_py")->SetTitle("generator particle y coordinate of momentum vector");
     mtree->Branch("GenDau_pz",&GenDau_pz);
     mtree->GetBranch("GenDau_pz")->SetTitle("generator particle z coordinate of momentum vector");
+    mtree->Branch("GenDau_e",&GenDau_e);
+    mtree->GetBranch("GenDau_e")->SetTitle("generator particle energy");
     mtree->Branch("GenDau_status",&GenDau_status);
     mtree->GetBranch("GenDau_status")->SetTitle("Particle status. 1=stable");
     mtree->Branch("GenDau_longlived",&GenDau_longlived);
@@ -219,6 +225,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenPart_px.clear();
    GenPart_py.clear();
    GenPart_pz.clear();
+   GenPart_e.clear();
    GenPart_status.clear();
    GenPart_longlived.clear();
    GenPart_vx.clear();
@@ -235,6 +242,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenDau_px.clear();
    GenDau_py.clear();
    GenDau_pz.clear();
+   GenDau_e.clear();
    GenDau_status.clear();
    GenDau_longlived.clear();
    GenDau_vx.clear();
@@ -279,6 +287,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_px.push_back(itGenPart->px());
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
+                  GenPart_e.push_back(itGenPart->e());
 		  GenPart_longlived.push_back(itGenPart->longLived());
                   GenPart_vx.push_back(itGenPart->vertex().x());
                   GenPart_vy.push_back(itGenPart->vertex().y());
@@ -301,6 +310,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   	GenDau_px.push_back(d->px());
                   	GenDau_py.push_back(d->py());
                   	GenDau_pz.push_back(d->pz());
+                    GenDau_e.push_back(d->e());
                   	GenDau_mompdgId.push_back(itGenPart->pdgId());
 			              GenPart_longlived.push_back(d->longLived());
                     GenDau_vx.push_back(d->vertex().x());
