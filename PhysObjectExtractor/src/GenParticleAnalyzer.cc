@@ -287,7 +287,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_px.push_back(itGenPart->px());
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
-                  GenPart_e.push_back(itGenPart->e());
+                  //GenPart_e.push_back(itGenPart->e());
 		  GenPart_longlived.push_back(itGenPart->longLived());
                   GenPart_vx.push_back(itGenPart->vertex().x());
                   GenPart_vy.push_back(itGenPart->vertex().y());
@@ -310,7 +310,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   	GenDau_px.push_back(d->px());
                   	GenDau_py.push_back(d->py());
                   	GenDau_pz.push_back(d->pz());
-                    GenDau_e.push_back(d->e());
+                    //GenDau_e.push_back(d->e());
                   	GenDau_mompdgId.push_back(itGenPart->pdgId());
 			              GenPart_longlived.push_back(d->longLived());
                     GenDau_vx.push_back(d->vertex().x());
