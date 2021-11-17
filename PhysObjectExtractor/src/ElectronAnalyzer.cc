@@ -110,6 +110,7 @@ private:
   std::vector<bool> electron_isLoose;
   std::vector<bool> electron_isMedium;
   std::vector<bool> electron_isTight;
+  std::vector<int> trk_identity;
   std::vector<bool> trk_isHQ;
   std::vector<float> trk_NChi2;
   std::vector<float> trk_d0;
@@ -244,6 +245,8 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_isMedium")->SetTitle("electron tagged medium");
   mtree->Branch("electron_isTight",&electron_isTight);
   mtree->GetBranch("electron_isTight")->SetTitle("electron tagged tight");
+  mtree->Branch("trk_identity",&trk_identity);
+  mtree->GetBranch("trk_identity")->SetTitle("electron track identity tag");
   mtree->Branch("trk_isHQ",&trk_isHQ);
   mtree->GetBranch("trk_isHQ")->SetTitle("electron track tagged HighQuality");
   mtree->Branch("trk_NChi2",&trk_NChi2);
@@ -418,6 +421,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   electron_isLoose.clear();
   electron_isMedium.clear();
   electron_isTight.clear();
+  trk_identity.clear();
   trk_isHQ.clear();
   trk_NChi2.clear();
   trk_d0.clear();
@@ -703,8 +707,11 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
  }
  k++;
  electron_BdR.push_back(saveDR);
+
  //electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
+
+for(size_t x =0; x<myelectrons->size(); x++)trk_identity.push_back(identyTrack[x]);
 
 ////////////////////////////////////////////////////////////////////
 
