@@ -69,7 +69,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       std::vector<float> GenPart_px;
       std::vector<float> GenPart_py;
       std::vector<float> GenPart_pz;
-      std::vector<float> GenPart_e;
+      //std::vector<float> GenPart_e;
       std::vector<int> GenPart_mompdgId;
       std::vector<bool> GenPart_longlived;
       std::vector<float> GenPart_vx;
@@ -149,8 +149,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("GenPart_py")->SetTitle("generator particle y coordinate of momentum vector");
     mtree->Branch("GenPart_pz",&GenPart_pz);
     mtree->GetBranch("GenPart_pz")->SetTitle("generator particle z coordinate of momentum vector");
-    mtree->Branch("GenPart_e",&GenPart_e);
-    mtree->GetBranch("GenPart_e")->SetTitle("generator particle energy");
+    //mtree->Branch("GenPart_e",&GenPart_e);
+    //mtree->GetBranch("GenPart_e")->SetTitle("generator particle energy");
     mtree->Branch("GenPart_status",&GenPart_status);
     mtree->GetBranch("GenPart_status")->SetTitle("Particle status. 1=stable");
     mtree->Branch("GenPart_longlived",&GenPart_longlived);
@@ -225,7 +225,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    GenPart_px.clear();
    GenPart_py.clear();
    GenPart_pz.clear();
-   GenPart_e.clear();
+   //GenPart_e.clear();
    GenPart_status.clear();
    GenPart_longlived.clear();
    GenPart_vx.clear();
