@@ -49,13 +49,14 @@ class TriggObjectAnalyzer : public edm::EDAnalyzer {
       virtual void endRun(edm::Run const&, edm::EventSetup const&);
       virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
-
+      
       //declare de filter (module) of the trigger
       std::string filterName_;
+      HLTConfigProvider hltConfig_;      
 
       // ----------member data ---------------------------
-
-
+      
+      
       TTree *mtree;
       int numtrigobj; //number of trigger objects in the event
       std::vector<float> trigobj_e;
@@ -86,8 +87,8 @@ TriggObjectAnalyzer::TriggObjectAnalyzer(const edm::ParameterSet& iConfig)
 	filterName_ = iConfig.getParameter<std::string>("filterName");
 	edm::Service<TFileService> fs;
 	mtree = fs->make<TTree>("Events", "Events");
-
-
+	
+	
 	mtree->Branch("numbertrigobj",&numtrigobj);
 	mtree->Branch("trigobj_e",&trigobj_e);
 	mtree->Branch("trigobj_pt",&trigobj_pt);
@@ -96,7 +97,7 @@ TriggObjectAnalyzer::TriggObjectAnalyzer(const edm::ParameterSet& iConfig)
 	mtree->Branch("trigobj_pz",&trigobj_pz);
 	mtree->Branch("trigobj_eta",&trigobj_eta);
 	mtree->Branch("trigobj_phi",&trigobj_phi);
-
+	
 }
 
 
@@ -116,13 +117,13 @@ TriggObjectAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 {
    using namespace edm;
    using namespace std;
-
+   
    InputTag trigEventTag("hltTriggerSummaryAOD","","HLT"); //make sure have correct process on MC
    //data process=HLT, MC depends, Spring11 is REDIGI311X
    Handle<trigger::TriggerEvent> mytrigEvent;
    iEvent.getByLabel(trigEventTag,mytrigEvent);
 
-   Handle<edm::TriggerResults> trigResults;
+   Handle<edm::TriggerResults> trigResults; 
    edm::InputTag trigResultsTag("TriggerResults","","HLT");
    iEvent.getByLabel(trigResultsTag,trigResults);
 
@@ -143,32 +144,51 @@ TriggObjectAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
  * and may also differ from file to file. In the loop below we check which one it is.
  * **/
 
-int triggerFound=9999;
+//int triggerFound=9999;
+string filterName = "none";
 for(int j = 0; j < 4; j++){
 for (unsigned int i = 0; i< trigNames.size(); i++)
 {
-
-
+	
+	
 	std::string trig = trigNames.triggerName(i);
+	const unsigned int triggerIndex(hltConfig_.triggerIndex(trig));
 	if ( trig.find(toFind[j]) !=std::string::npos ){
-
-		int wr = trigResults->wasrun(trigNames.triggerIndex(trig));
-		int acc = trigResults->accept(trigNames.triggerIndex(trig));
-		int err = trigResults->error(trigNames.triggerIndex(trig));
+		
+		int wr = trigResults->wasrun(triggerIndex);
+		int acc = trigResults->accept(triggerIndex);
+		int err = trigResults->error(triggerIndex);
 		if(wr == 1 && acc == 1 && err == 0 ){
-			triggerFound=j;
-			i = trigNames.size();
-			j = 4;
+			const unsigned int m(hltConfig_.size(triggerIndex));
+  			const vector<string>& moduleLabels(hltConfig_.moduleLabels(triggerIndex));
+  			const unsigned int moduleIndex(trigResults->index(triggerIndex));
+			assert (moduleIndex<m);
+			cout<<"modules for: "<<trig<<endl;
+			for (unsigned int j=0; j<=moduleIndex; ++j) {
+     				const string& moduleLabel(moduleLabels[j]);
+				//cout<<'	'<<moduleLabel<<endl;	
+				const unsigned int filterIndex(mytrigEvent->filterIndex(InputTag(moduleLabel,"","HLT")));
+				if (filterIndex<mytrigEvent->sizeFilters() && j+1==moduleIndex){
+					cout<<moduleLabel<<endl;
+					filterName = moduleLabel;
+					} 
+				}
+			//else cout<<"NoTrig "<<wr<<' '<<acc<< ' '<<err<<endl;
+			//triggerFound=j;
+			//i = trigNames.size();
+			//j = 4;
 			}
-		}
-
+		//else cout<<"NoTrig "<<wr<<' '<<acc<< ' '<<err<<endl;
+	}
+	//else cout<<"NoTrig "<<wr<<' '<<acc<< ' '<<err<<endl;
+		
 	}
 }
 /*** Here we check if the trigger was activated and store the result
  * in the variable passTrig. This is a requirement for the analysis.
  * ***/
 //cout<<triggerFound<<endl;
-string filterName = "none";
+/*string filterName = "none";
 
 if (triggerFound == 0)
 {
@@ -178,14 +198,14 @@ else if (triggerFound == 1)
 {
 	filterName = "hltPhoton36R9Id85Photon22CaloId10Iso50EgammaDoubleLegCombLastFilter";
 }
-else if (triggerFound ==2)
+else if (triggerFound ==2) 
 {
 	filterName = "hltPhoton36CaloId10Iso50Photon22R9Id85EgammaDoubleLegCombLastFilter";
 }
 else
 {
         filterName = "hltEG22CaloId10Iso50TrackIsoDoubleLastFilterUnseeded";
-}
+}*/
 
 std::string e_filterName(filterName);
 
@@ -211,10 +231,10 @@ std::string e_filterName(filterName);
 	    numtrigobj=numtrigobj+1;
     }
   }//end filter size check
-
+  
   mtree->Fill();
   return;
-
+  
 }
 
 // ------------ method called once each job just before starting event loop  ------------
@@ -229,8 +249,12 @@ TriggObjectAnalyzer::endJob()
 
 // ------------ method called when starting to processes a run  ------------
 void
-TriggObjectAnalyzer::beginRun(edm::Run const&, edm::EventSetup const&)
-{}
+TriggObjectAnalyzer::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup)
+{
+	bool changed(true);
+    hltConfig_.init(iRun,iSetup,"HLT",changed);
+
+}
 
 // ------------ method called when ending the processing of a run  ------------
 void
