@@ -111,7 +111,7 @@ private:
   std::vector<bool> electron_isMedium;
   std::vector<bool> electron_isTight;
   std::vector<int> trk_identity;
-  std::vector<bool> trk_isHQ;
+  std::vector<int> trk_isHQ;
   std::vector<float> trk_NChi2;
   std::vector<float> trk_d0;
   std::vector<float> trk_d0E;
@@ -704,6 +704,15 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
 	j++;
      }
   }
+ }
+ else {
+   trk_isHQ.push_back(-1);
+         trk_NChi2.push_back(-1);
+   trk_d0.push_back(-1);
+   trk_d0E.push_back(-1);
+         trk_dZ.push_back(-1);
+         trk_dZE.push_back(-1);
+   trk_Nlayer.push_back(-1);
  }
  k++;
  electron_BdR.push_back(saveDR);
