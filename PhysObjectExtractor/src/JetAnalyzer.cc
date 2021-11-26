@@ -129,6 +129,8 @@ private:
   std::vector<float> corr_jet_ptSmearDown;
   std::vector<int> NConstituents;
   std::vector<float> NeutralHF;
+  std::vector<float> NeutralEMF;
+  std::vector<float> MuonF;
   std::vector<float> ChargedEMF;
   std::vector<float> ChargedHF;
   std::vector<float> ChargedMult;
@@ -259,7 +261,11 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("ChargedHF")->SetTitle("Jet charged hadron energy fraction");
   mtree->Branch("ChargedMult", &ChargedMult);
   mtree->GetBranch("ChargedMult")->SetTitle("Jet charged multiplicity");
-
+  mtree->Branch("NeutralEMF", &NeutralEMF);
+  mtree->GetBranch("NeutralEMF")->SetTitle("Jet neutral EM energy fraction");
+  mtree->Branch("MuonF", &MuonF);
+  mtree->GetBranch("MuonF")->SetTitle("Jet muon energy fraction");
+	
 }
 
 JetAnalyzer::~JetAnalyzer()
@@ -556,10 +562,13 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       if (ptscale*corr*uncorrJet.pt() >= min_pt){
 	/*cout<<itjet->getPFConstituents().size()<<' '<<itjet->chargedMultiplicity()<<' '<<itjet->chargedHadronEnergyFraction();
-	cout<<' '<<itjet->neutralHadronEnergyFraction()<<' '<<itjet->chargedEmEnergyFraction()<<endl;*/
+	cout<<' '<<itjet->neutralHadronEnergyFraction()<<' '<<itjet->neutralEmEnergyFraction()<<' '<<itjet->muonEnergyFraction()
+	<<' '<<itjet->chargedEmEnergyFraction()<<endl;*/
 	  const_pos.push_back(itjet->getPFConstituent(0)->positionAtECALEntrance());
 	  const_pt.push_back(itjet->getPFConstituent(0)->pt());
   	NConstituents.push_back(itjet->getPFConstituents().size());
+	NeutralEMF.push_back(itjet->neutralEmEnergyFraction());
+	MuonF.push_back(itjet->muonEnergyFraction());
   	NeutralHF.push_back(itjet->neutralHadronEnergyFraction());
   	ChargedEMF.push_back(itjet->chargedEmEnergyFraction());
   	ChargedHF.push_back(itjet->chargedHadronEnergyFraction());
