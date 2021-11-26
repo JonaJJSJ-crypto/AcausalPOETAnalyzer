@@ -138,7 +138,8 @@ TriggObjectAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
    trigobj_eta.clear();
    trigobj_phi.clear();
 
-   string toFind[4] = {"HLT_Photon36_R9Id85_Photon22_R9Id85_v","HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v", "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v","HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v"};
+   string toFind[4] = {"HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v","HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v",
+		       "HLT_Photon36_R9Id85_Photon22_R9Id85_v","HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v"};
 
 /*** Photon AOD files (used for the electron analysis part) may have any of the above triggers
  * and may also differ from file to file. In the loop below we check which one it is.
@@ -163,15 +164,23 @@ for (unsigned int i = 0; i< trigNames.size(); i++)
   			const vector<string>& moduleLabels(hltConfig_.moduleLabels(triggerIndex));
   			const unsigned int moduleIndex(trigResults->index(triggerIndex));
 			assert (moduleIndex<m);
-			cout<<"modules for: "<<trig<<endl;
-			for (unsigned int j=0; j<=moduleIndex; ++j) {
-     				const string& moduleLabel(moduleLabels[j]);
+			//cout<<"modules for: "<<trig<<endl;
+			for (unsigned int k=0; k<=moduleIndex; ++k) {
+     				const string& moduleLabel(moduleLabels[k]);
 				//cout<<'	'<<moduleLabel<<endl;	
-				const unsigned int filterIndex(mytrigEvent->filterIndex(InputTag(moduleLabel,"","HLT")));
-				if (filterIndex<mytrigEvent->sizeFilters() && j+1==moduleIndex){
-					cout<<moduleLabel<<endl;
-					filterName = moduleLabel;
-					} 
+				//const unsigned int filterIndex(mytrigEvent->filterIndex(InputTag(moduleLabel,"","HLT")));
+				if(j<2){
+					if (k+2==moduleIndex){
+                                        	//cout<<" "<<moduleLabel<<endl;
+                                        	filterName = "CombLast";
+                                        	}
+					}
+				else{
+					if (k+1==moduleIndex){
+                                                //cout<<" "<<moduleLabel<<endl;
+                                                filterName = moduleLabel;
+                                                }
+					}
 				}
 			//else cout<<"NoTrig "<<wr<<' '<<acc<< ' '<<err<<endl;
 			//triggerFound=j;
@@ -179,8 +188,7 @@ for (unsigned int i = 0; i< trigNames.size(); i++)
 			//j = 4;
 			}
 		//else cout<<"NoTrig "<<wr<<' '<<acc<< ' '<<err<<endl;
-	}
-	//else cout<<"NoTrig "<<wr<<' '<<acc<< ' '<<err<<endl;
+		}
 		
 	}
 }
@@ -207,7 +215,38 @@ else
         filterName = "hltEG22CaloId10Iso50TrackIsoDoubleLastFilterUnseeded";
 }*/
 
-std::string e_filterName(filterName);
+if(filterName=="CombLast"){
+   for(size_t i=0; i<2; i++){
+	std::string e_filterName;
+	if(i==0) e_filterName="hltEG22R9Id85LastFilterUnseeded";
+	else e_filterName="hltEG22CaloId10Iso50TrackIsoLastFilterUnseeded";
+
+    	trigger::size_type filterIndex = mytrigEvent->filterIndex(edm::InputTag(e_filterName,"",trigEventTag.process()));
+    	if(filterIndex<mytrigEvent->sizeFilters()){
+    	const trigger::Keys& trigKeys = mytrigEvent->filterKeys(filterIndex);
+    	const trigger::TriggerObjectCollection & trigObjColl(mytrigEvent->getObjects());
+
+    	//now loop of the trigger objects passing filter
+    	for(trigger::Keys::const_iterator keyIt=trigKeys.begin();keyIt!=trigKeys.end();++keyIt){
+      	const trigger::TriggerObject trigobj = trigObjColl[*keyIt];
+
+	 //do what you want with the trigger objects, you have
+     	 //eta,phi,pt,mass,p,px,py,pz,et,energy accessors
+            trigobj_e.push_back(trigobj.energy());
+            trigobj_pt.push_back(trigobj.pt());
+            trigobj_px.push_back(trigobj.px());
+            trigobj_py.push_back(trigobj.py());
+            trigobj_pz.push_back(trigobj.pz());
+            trigobj_eta.push_back(trigobj.eta());
+            trigobj_phi.push_back(trigobj.phi());
+
+            numtrigobj=numtrigobj+1;
+    	    }
+	  }
+	}///fin for
+}
+else{
+    std::string e_filterName(filterName);
 
     trigger::size_type filterIndex = mytrigEvent->filterIndex(edm::InputTag(e_filterName,"",trigEventTag.process()));
     if(filterIndex<mytrigEvent->sizeFilters()){
@@ -229,9 +268,11 @@ std::string e_filterName(filterName);
 	    trigobj_phi.push_back(trigobj.phi());
 
 	    numtrigobj=numtrigobj+1;
-    }
-  }//end filter size check
-  
+    	    }
+  	}//end filter size check
+  }
+  //cout<<filterName<<"     "<<numtrigobj<<"\n\n";
+
   mtree->Fill();
   return;
   
