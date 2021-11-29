@@ -61,7 +61,7 @@ class JetAnalyzer : public edm::EDAnalyzer {
 public:
   explicit JetAnalyzer(const edm::ParameterSet&);
   ~JetAnalyzer();
-  
+
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
   std::vector<float> factorLookup(float eta);
 private:
@@ -70,7 +70,7 @@ private:
   virtual double getBtagEfficiency(double pt);
   virtual double getCtagEfficiency(double pt);
   virtual double getLFtagEfficiency(double pt);
-  virtual double getBorCtagSF(double pt, double eta); 
+  virtual double getBorCtagSF(double pt, double eta);
   virtual double getLFtagSF(double pt, double eta);
   virtual double uncertaintyForBTagSF( double pt, double eta);
   virtual double uncertaintyForLFTagSF( double pt, double eta);
@@ -78,12 +78,12 @@ private:
   virtual void beginRun(edm::Run const&, edm::EventSetup const&);
   virtual void endRun(edm::Run const&, edm::EventSetup const&);
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
-  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;  
-       
+  virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
+
   //declare the input tag for PFJetCollection
   edm::InputTag jetInput;
-  
-  // ----------member data ---------------------------    
+
+  // ----------member data ---------------------------
   // jec variables
   std::vector<std::string> jecPayloadNames_;
   std::string              jecL1_;
@@ -159,14 +159,14 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   jetInput = iConfig.getParameter<edm::InputTag>("InputCollection");
   edm::Service<TFileService> fs;
   mtree = fs->make<TTree>("Events", "Events");
-  
+
   isData = iConfig.getParameter<bool>("isData");
-  jecL1_ = iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath(); // JEC level payloads                     
-  jecL2_ = iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath(); // JEC level payloads                     
-  jecL3_ = iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath(); // JEC level payloads                     
+  jecL1_ = iConfig.getParameter<edm::FileInPath>("jecL1Name").fullPath(); // JEC level payloads
+  jecL2_ = iConfig.getParameter<edm::FileInPath>("jecL2Name").fullPath(); // JEC level payloads
+  jecL3_ = iConfig.getParameter<edm::FileInPath>("jecL3Name").fullPath(); // JEC level payloads
   jecRes_= iConfig.getParameter<edm::FileInPath>("jecResName").fullPath();
   jecUncName_ = iConfig.getParameter<edm::FileInPath>("jecUncName").fullPath(); // JEC uncertainties
-  jerResName_ = iConfig.getParameter<edm::FileInPath>("jerResName").fullPath(); // JER Resolutions                               
+  jerResName_ = iConfig.getParameter<edm::FileInPath>("jerResName").fullPath(); // JER Resolutions
 
   //Get the factorized jet corrector parameters.
   jecPayloadNames_.push_back(jecL1_);
@@ -180,13 +180,13 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
     vPar.push_back(pars);
   }
 
-  // Make the FactorizedJetCorrector and Uncertainty                                                                                              
+  // Make the FactorizedJetCorrector and Uncertainty
   jec_ = boost::shared_ptr<FactorizedJetCorrector> ( new FactorizedJetCorrector(vPar) );
   jecUnc_ = boost::shared_ptr<JetCorrectionUncertainty>( new JetCorrectionUncertainty(jecUncName_) );
   JetCorrectorParameters *jerPar = new JetCorrectorParameters(jerResName_);
-  jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*jerPar) );  
+  jer_ = boost::shared_ptr<SimpleJetCorrector>( new SimpleJetCorrector(*jerPar) );
 
-	
+
   mtree->Branch("numberjet",&numjet);
   mtree->GetBranch("numberjet")->SetTitle("Number of Jets");
   mtree->Branch("jet_e",&jet_e);
@@ -195,7 +195,7 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("jet_pt")->SetTitle("Uncorrected Transverse Jet Momentum");
   mtree->Branch("jet_px",&jet_px);
   mtree->GetBranch("jet_px")->SetTitle("X-Component of Jet Momentum");
-  mtree->Branch("jet_py",&jet_py); 
+  mtree->Branch("jet_py",&jet_py);
   mtree->GetBranch("jet_py")->SetTitle("Y-Component of Jet Momentum");
   mtree->Branch("jet_pz",&jet_pz);
   mtree->GetBranch("jet_pz")->SetTitle("Z-Component of Jet Momentum");
@@ -243,7 +243,7 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("corr_jet_ptDown")->SetTitle("Corrected Transverse Jet Momentum (JEC Shifted Down)");
   mtree->Branch("corr_jet_ptSmearUp",&corr_jet_ptSmearUp);
   mtree->GetBranch("corr_jet_ptSmearUp")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Up)");
-  mtree->Branch("corr_jet_ptSmearDown",&corr_jet_ptSmearDown);	
+  mtree->Branch("corr_jet_ptSmearDown",&corr_jet_ptSmearDown);
   mtree->GetBranch("corr_jet_ptSmearDown")->SetTitle("Corrected Transverse Jet Momentum (JER Shifted Down)");
   mtree->Branch("btag_Weight", &btagWeight);
   mtree->GetBranch("btag_Weight")->SetTitle("B-Tag event weight");
@@ -265,7 +265,7 @@ JetAnalyzer::JetAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("NeutralEMF")->SetTitle("Jet neutral EM energy fraction");
   mtree->Branch("MuonF", &MuonF);
   mtree->GetBranch("MuonF")->SetTitle("Jet muon energy fraction");
-	
+
 }
 
 JetAnalyzer::~JetAnalyzer()
@@ -448,6 +448,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   corr_jet_ptSmearDown.clear();
   NConstituents.clear();
   NeutralHF.clear();
+  NeutralEMF.clear();
+  MuonF.clear();
   ChargedEMF.clear();
   ChargedHF.clear();
   ChargedMult.clear();
@@ -466,17 +468,17 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //cout<<id<<endl;
 
             if(id==23){
-             
+
 		int n = p.numberOfDaughters();
 		//cout<<"Nd: "<<n<<endl;
-              
+
 	     for(int j = 0; j < n; ++ j) {
-                
+
 	   	const Candidate * d = p.daughter( j );
                 //cout<<"pt: "<<d->pt()<<" pdg: "<<d->pdgId()<<endl;
-		
+
 		for(size_t k = 0; k < genParticles->size(); ++ k) {
-		  
+
 		  const GenParticle & dit = (*genParticles)[k];
 		  int ditid=dit.pdgId();
 		  //cout<<ditid<<endl;
@@ -493,7 +495,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
 	}
 ///////////////////Z dau to jet identifier///////////////////
-  
+
 
 
   if(myjets.isValid()){
@@ -519,7 +521,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       jec_->setRho   ( *(rhoHandle.product()) );
       jec_->setNPV   ( vertices->size() );
       corr = jec_->getCorrection();
-      
+
       corrUp = 1.0;
       corrDown = 1.0;
 
@@ -532,7 +534,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       else jecUnc_->setJetEta( 4.99 );
       jecUnc_->setJetPt( itjet->pt() );
       corrDown = (1 - fabs(jecUnc_->getUncertainty(-1)));
-         
+
       ptscale = 1;
       ptscale_down = 1;
       ptscale_up = 1;
@@ -545,21 +547,21 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	feta.push_back( fabs(uncorrJet.eta()) );
 	PTNPU.push_back( pt );
 	PTNPU.push_back( vertices->size() );
-	
+
 	res = jer_->correction(feta, PTNPU);
-	
+
 	TRandom3 JERrand;
-	
+
 	JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
 	ptscale = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, factors[0]*factors[0] - 1.0)));
-	
+
 	JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
 	ptscale_down = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, factors[1]*factors[1] - 1.0)));
-	
+
 	JERrand.SetSeed(abs(static_cast<int>(itjet->phi()*1e4)));
 	ptscale_up = max(0.0, 1.0 + JERrand.Gaus(0, res)*sqrt(max(0.0, factors[2]*factors[2] - 1.0)));
       }
-      
+
       if (ptscale*corr*uncorrJet.pt() >= min_pt){
 	/*cout<<itjet->getPFConstituents().size()<<' '<<itjet->chargedMultiplicity()<<' '<<itjet->chargedHadronEnergyFraction();
 	cout<<' '<<itjet->neutralHadronEnergyFraction()<<' '<<itjet->neutralEmEnergyFraction()<<' '<<itjet->muonEnergyFraction()
@@ -583,7 +585,7 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	jet_phi.push_back(itjet->phi());
 	jet_ch.push_back(itjet->charge());
 	jet_mass.push_back(itjet->mass());
-	
+
 	if(btags.isValid() && (itjet - myjets->begin()) < btags->size()) {
 	  jet_btag.push_back(btags->operator[](itjet - myjets->begin()).second);
 	}
@@ -631,8 +633,8 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  eff = 1;
 	  reco::JetFlavourInfo aInfo = injets->operator[](itjet - myjets->begin()).second;
 	  hadronFlavour = aInfo.getPartonFlavour();
-	  corrpt = corr_jet_pt.at(numjet);       
-	  
+	  corrpt = corr_jet_pt.at(numjet);
+
 	  if (jet_btag.at(numjet)> 0.679){
 	    if(abs(hadronFlavour) == 5){
 	      eff = getBtagEfficiency(corrpt);
@@ -683,11 +685,11 @@ JetAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     btagWeight = (btagWeight/MC);
     btagWeightUp = (btagWeightUp/MC);
-    btagWeightDn = (btagWeightDn/MC);   
-   }  
+    btagWeightDn = (btagWeightDn/MC);
+   }
   mtree->Fill();
   return;
-  
+
 }
 
 // ------------ method called once each job just before starting event loop  ------------
