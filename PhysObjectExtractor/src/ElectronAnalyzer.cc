@@ -786,7 +786,7 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
     secvec_eta.push_back(itTrack1->eta());
     secvec_deltaR1.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack2->eta(),itTrack2->phi()));
     secvec_phi1.push_back(itTrack2->phi());
-    secvec_phi2.push_back(itTrack2->eta());
+    secvec_eta1.push_back(itTrack2->eta());
     secvec_deltaR2.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack3->eta(),itTrack3->phi()));
     secvec_phi2.push_back(itTrack3->phi());
     secvec_eta2.push_back(itTrack3->eta());
