@@ -38,3 +38,13 @@ file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM20
 file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_37.root
 file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_38.root
 file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_39.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_40.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_41.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_42.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_43.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_44.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_45.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_46.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_47.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_48.root
+file:/eos/home-e/ecarrera/lee-wick/signal/LWSM200DnR/merged/recoLW_merged_LWSM200DnR_49.root
