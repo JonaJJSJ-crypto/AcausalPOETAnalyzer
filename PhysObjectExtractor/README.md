@@ -46,7 +46,7 @@ cmsenv
 3. Obtain the code from git:
 ```
 git clone git@github.com:JonaJJSJ-crypto/AcausalPOETAnalyzer.git
-cd PhysObjectExtractorTool
+cd AcausalPOETAnalyzer
 ```
 4. Compile everything:
 ```
