@@ -959,7 +959,7 @@ for(size_t x=0; x<finalVertices.size(); x++){
 //////////////////////////////////////////Making secondary vertices with electron tracks///////////////////////////////
 ///////////////plan iterate all electron track with hq tracks to form vertices and then merge them all
 bool Eletrack;
-int x=0;
+int EleCount=0;
 for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1){
   Eletrack=false;
   i=0;
@@ -968,7 +968,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
          ++itTrack1)
   {
     if( itTrack1->pt()>1){
-      if(i==identyTrack[x]) Eletrack=true;
+      if(i==identyTrack[EleCount]) Eletrack=true;
       if( Eletrack && itTrack1->quality(reco::Track::highPurity) ){
         //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
         int	j2=0;
@@ -1126,10 +1126,10 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
     Esecvec_chi2.push_back(myV.totalChiSquared());
     Esecvec_nodf.push_back(myV.degreesOfFreedom());
     Esecvec_normchi2.push_back(myV.normalisedChiSquared());
-    Esecvec_eleTag.push_back(x);
+    Esecvec_eleTag.push_back(EleCount);
   }
 
-  x++;
+  EleCount++;
 }
 
 }// Final de Is ValidElectron
