@@ -2,7 +2,7 @@
 //
 // Package:    VertexAnalyzer
 // Class:      VertexAnalyzer
-// 
+//
 /**\class VertexAnalyzer VertexAnalyzer.cc Vertex/VertexAnalyzer/src/VertexAnalyzer.cc
 
  Description: [one line class summary]
@@ -11,7 +11,7 @@
      [Notes on implementation]
 */
 //
-// Original Author:  
+// Original Author:
 //         Created:  Sat Jun 12 11:03:58 CEST 2021
 // $Id$
 //
@@ -68,16 +68,24 @@ class VertexAnalyzer : public edm::EDAnalyzer {
       virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&);
 
       // ----------member data ---------------------------
-    
-    TTree *mtree; 
+
+    TTree *mtree;
     std::vector<float> PV_chi2;
     std::vector<float> PV_ndof;
     int PV_npvs;
     int PV_npvsGood;
     std::vector<float> PV_score;
     std::vector<float> PV_x;
-    std::vector<float> PV_y; 
+    std::vector<float> PV_y;
     std::vector<float> PV_z;
+    std::vector<float> Bsp_x;
+    std::vector<float> Bsp_y;
+    std::vector<float> Bsp_z;
+    std::vector<float> Bsp_sigmaz;
+    std::vector<float> Bsp_dxdz;
+    std::vector<float> Bsp_dydz;
+    std::vector<float> Bsp_widthx;
+    std::vector<float> Bsp_widthy;
     Float_t Bsp_z;
 };
 
@@ -96,7 +104,7 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
 
 {
    //now do what ever initialization is needed
-  
+
    edm::Service<TFileService> fs;
    mtree = fs->make<TTree>("Events", "Events");
    mtree->Branch("PV_chi2",&PV_chi2);
@@ -115,12 +123,26 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
    mtree->GetBranch("PV_y")->SetTitle("main primary vertex y coordinate");
    mtree->Branch("PV_z",&PV_z);
    mtree->GetBranch("PV_z")->SetTitle("main primary vertex z coordinate");
+   mtree->Branch("Bsp_x",&Bsp_x);
+   mtree->GetBranch("Bsp_x")->SetTitle("vertex Beamspot position x (mm)");
+   mtree->Branch("Bsp_y",&Bsp_y);
+   mtree->GetBranch("Bsp_y")->SetTitle("vertex Beamspot position y (mm)");
+   mtree->Branch("Bsp_z",&Bsp_z);
+   mtree->GetBranch("Bsp_z")->SetTitle("vertex Beamspot position z (mm)");
+   mtree->Branch("Bsp_sigmaz",&Bsp_sigmaz);
+   mtree->GetBranch("Bsp_sigmaz")->SetTitle("vertex Beamspot sigma z (mm)");
+   mtree->Branch("Bsp_dxdz",&Bsp_dxdz);
+   mtree->GetBranch("Bsp_dxdz")->SetTitle("vertex Beamspot dxdz (mm)");
+   mtree->Branch("Bsp_dydz",&Bsp_dydz);
+   mtree->GetBranch("Bsp_dydz")->SetTitle("vertex Beamspot position dydz (mm)");
+   mtree->Branch("Bsp_widthx",&Bsp_widthx);
+   mtree->GetBranch("Bsp_widthx")->SetTitle("vertex Beamspot width x (mm)");
 }
 
 
 VertexAnalyzer::~VertexAnalyzer()
 {
- 
+
    // do anything here that needs to be done at desctruction time
    // (e.g. close files, deallocate resources etc.)
 
@@ -143,6 +165,14 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    PV_x.clear();
    PV_y.clear();
    PV_z.clear();
+   Bsp_x.clear();
+   Bsp_y.clear();
+   Bsp_z.clear();
+   Bsp_sigmaz.clear();
+   Bsp_dxdz.clear();
+   Bsp_dydz.clear();
+   Bsp_widthx.clear();
+   Bsp_widthy.clear();
    PV_npvs=0;
    PV_npvsGood=0;
 
@@ -155,7 +185,7 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    edm::Handle<reco::BeamSpot> beamSpotHandle;
    iEvent.getByLabel("offlineBeamSpot", beamSpotHandle);
    reco::BeamSpot vertexBeamSpot= *beamSpotHandle;
-   
+
    if(Primvertex.isValid())
    {
      PV_npvs=Primvertex->size();
@@ -168,6 +198,15 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
        PV_x.push_back(vite->x());
        PV_y.push_back(vite->y());
        PV_z.push_back(vite->z());
+       Bsp_x.push_back(vertexBeamSpot.x0());
+       	Bsp_y.push_back(vertexBeamSpot.y0());
+       	Bsp_z.push_back(vertexBeamSpot.z0());
+       	Bsp_sigmaz.push_back(vertexBeamSpot.sigmaZ());
+       	Bsp_dxdz.push_back(vertexBeamSpot.dxdz());
+       	Bsp_dydz.push_back(vertexBeamSpot.dydz());
+       	Bsp_widthx.push_back(vertexBeamSpot.BeamWidthX());
+       	Bsp_widthy.push_back(vertexBeamSpot.BeamWidthY());
+
        for (reco::Vertex::trackRef_iterator iTrack = vite->tracks_begin(); iTrack != vite->tracks_end(); ++iTrack)
 	    {
 	     const reco::TrackRef trackRef = iTrack->castTo<reco::TrackRef>();
@@ -192,7 +231,7 @@ VertexAnalyzer::beginJob()
 
 // ------------ method called once each job just after ending the event loop  ------------
 void
-VertexAnalyzer::endJob() 
+VertexAnalyzer::endJob()
 {
 }
 
