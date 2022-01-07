@@ -86,7 +86,7 @@ class VertexAnalyzer : public edm::EDAnalyzer {
     std::vector<float> Bsp_dydz;
     std::vector<float> Bsp_widthx;
     std::vector<float> Bsp_widthy;
-    Float_t Bsp_z;
+    Float_t Bsp_z0;
 };
 
 //
@@ -189,7 +189,7 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
    if(Primvertex.isValid())
    {
      PV_npvs=Primvertex->size();
-     Bsp_z = vertexBeamSpot.z0();
+     Bsp_z0 = vertexBeamSpot.z0();
      for (reco::VertexCollection::const_iterator vite = Primvertex->begin(); vite != Primvertex->end(); ++vite)
      {
        float score=0;
@@ -214,7 +214,7 @@ VertexAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         score += trackpt*trackpt;
 	    }
       PV_score.push_back(score);
-      if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z)<24. && vite->position().Rho() < 2.)
+      if (!vite->isFake() && vite->isValid() && vite->ndof()>4 && fabs(vite->z()-Bsp_z0)<24. && vite->position().Rho() < 2.)
       ++PV_npvsGood;
       }
   }

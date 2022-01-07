@@ -82,7 +82,6 @@ private:
   int numelectron; //number of reco electrons in the event
   int numgenelec; //# of gen electrons in the event
   int numsecvec;  //number of secondary vertex disp in the event
-  int numEsecvec;  //number of secondary vertex disp in the event
   int numdisp;  //tool for finding best match for electrons
   std::vector<float> electron_e;
   std::vector<float> electron_pt;
@@ -130,20 +129,17 @@ private:
   std::vector<float> secvec_poserrory;
   std::vector<float> secvec_poserrorz;
   std::vector<int> secvec_eleTag;
-  std::vector<float> secvec_chi2;
-  std::vector<float> secvec_nodf;
-  std::vector<float> secvec_normchi2;
-
-  std::vector<float> Esecvec_posx;
-  std::vector<float> Esecvec_posy;
-  std::vector<float> Esecvec_posz;
-  std::vector<float> Esecvec_poserrorx;
-  std::vector<float> Esecvec_poserrory;
-  std::vector<float> Esecvec_poserrorz;
-  std::vector<int> Esecvec_eleTag;
-  std::vector<float> Esecvec_chi2;
-  std::vector<float> Esecvec_nodf;
-  std::vector<float> Esecvec_normchi2;
+  //std::vector<float> secvec_disp;
+  //std::vector<float> secvec_dispR;
+  //std::vector<float> secvec_deltaR;
+  std::vector<float> secvec_phi;
+  std::vector<float> secvec_eta;
+  std::vector<float> secvec_deltaR1;
+  std::vector<float> secvec_phi1;
+  std::vector<float> secvec_eta1;
+  std::vector<float> secvec_deltaR2;
+  std::vector<float> secvec_phi2;
+  std::vector<float> secvec_eta2;
   //std::vector<int> electron_Bsecvec;//best match for electron sec vec
   std::vector<int> electron_BdR;//best match delta R for electron sec vec
   std::vector<int> electron_secN;//# of printed electrons in Secvert
@@ -195,8 +191,6 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("numbergenelec")->SetTitle("number of gen electrons");
   mtree->Branch("numbersecvec",&numsecvec);
   mtree->GetBranch("numbersecvec")->SetTitle("number of secondary vertex displascements");
-  mtree->Branch("numberEsecvec",&numEsecvec);
-  mtree->GetBranch("numberEsecvec")->SetTitle("number of secondary vertex displascements");
   mtree->Branch("electron_e",&electron_e);
   mtree->GetBranch("electron_e")->SetTitle("electron energy");
   mtree->Branch("electron_pt",&electron_pt);
@@ -287,35 +281,28 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_poserrory")->SetTitle("secvec position y error (mm)");
   mtree->Branch("secvec_poserrorz",&secvec_poserrorz);
   mtree->GetBranch("secvec_poserrorz")->SetTitle("secvec position z error (mm)");
-  mtree->Branch("secvec_eleTag",&secvec_eleTag);
-  mtree->GetBranch("secvec_eleTag")->SetTitle("secvec electron Tag");
-  mtree->Branch("secvec_chi2",&secvec_chi2);
-  mtree->GetBranch("secvec_chi2")->SetTitle("Vertex chi squared");
-  mtree->Branch("secvec_normchi2",&secvec_normchi2);
-  mtree->GetBranch("secvec_normchi2")->SetTitle("Vertex normalized chi squared");
-  mtree->Branch("secvec_nodf",&secvec_nodf);
-  mtree->GetBranch("secvec_nodf")->SetTitle("Track number of degree of freedom");
-
-  mtree->Branch("Esecvec_posx",&Esecvec_posx);
-  mtree->GetBranch("Esecvec_posx")->SetTitle("secvec position x (mm)");
-  mtree->Branch("Esecvec_posy",&Esecvec_posy);
-  mtree->GetBranch("Esecvec_posy")->SetTitle("secvec position y (mm)");
-  mtree->Branch("Esecvec_posz",&Esecvec_posz);
-  mtree->GetBranch("Esecvec_posz")->SetTitle("secvec position z (mm)");
-  mtree->Branch("Esecvec_poserrorx",&Esecvec_poserrorx);
-  mtree->GetBranch("Esecvec_poserrorx")->SetTitle("secvec position x error (mm)");
-  mtree->Branch("Esecvec_poserrory",&Esecvec_poserrory);
-  mtree->GetBranch("Esecvec_poserrory")->SetTitle("secvec position y error (mm)");
-  mtree->Branch("Esecvec_poserrorz",&Esecvec_poserrorz);
-  mtree->GetBranch("Esecvec_poserrorz")->SetTitle("secvec position z error (mm)");
-  mtree->Branch("Esecvec_eleTag",&Esecvec_eleTag);
-  mtree->GetBranch("Esecvec_eleTag")->SetTitle("secvec electron Tag");
-  mtree->Branch("Esecvec_chi2",&Esecvec_chi2);
-  mtree->GetBranch("Esecvec_chi2")->SetTitle("Vertex chi squared");
-  mtree->Branch("Esecvec_normchi2",&Esecvec_normchi2);
-  mtree->GetBranch("Esecvec_normchi2")->SetTitle("Vertex normalized chi squared");
-  mtree->Branch("Esecvec_nodf",&Esecvec_nodf);
-  mtree->GetBranch("Esecvec_nodf")->SetTitle("Track number of degree of freedom");
+  //mtree->Branch("secvec_disp",&secvec_disp);
+  //mtree->GetBranch("secvec_disp")->SetTitle("secvec displacement from primary vertex (mm)");
+  //mtree->Branch("secvec_dispR",&secvec_dispR);
+  //mtree->GetBranch("secvec_dispR")->SetTitle("secvec weigthed displacement from primary vertex");
+  //mtree->Branch("secvec_deltaR",&secvec_deltaR);
+  //mtree->GetBranch("secvec_deltaR")->SetTitle("1-2tracks deltaR");
+  mtree->Branch("secvec_phi",&secvec_phi);
+  mtree->GetBranch("secvec_phi")->SetTitle("Track seed phi");
+  mtree->Branch("secvec_eta",&secvec_eta);
+  mtree->GetBranch("secvec_eta")->SetTitle("Track seed eta");
+  mtree->Branch("secvec_deltaR1",&secvec_deltaR1);
+  mtree->GetBranch("secvec_deltaR1")->SetTitle("1st track deltaR");
+  mtree->Branch("secvec_phi1",&secvec_phi1);
+  mtree->GetBranch("secvec_phi1")->SetTitle("Track 1 phi");
+  mtree->Branch("secvec_eta1",&secvec_eta1);
+  mtree->GetBranch("secvec_eta1")->SetTitle("Track 1 eta");
+  mtree->Branch("secvec_deltaR2",&secvec_deltaR2);
+  mtree->GetBranch("secvec_deltaR2")->SetTitle("2nd track deltaR");
+  mtree->Branch("secvec_phi2",&secvec_phi2);
+  mtree->GetBranch("secvec_phi2")->SetTitle("Track 2 phi");
+  mtree->Branch("secvec_eta2",&secvec_eta2);
+  mtree->GetBranch("secvec_eta2")->SetTitle("Track 2 eta");
   /*mtree->Branch("electron_Bsecvec",&electron_Bsecvec);
   mtree->GetBranch("electron_Bsecvec")->SetTitle("best match electrons for secondary vertex");*/
   mtree->Branch("electron_BdR",&electron_BdR);
@@ -406,7 +393,6 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   numelectron = 0;
   numgenelec = 0;
   numsecvec = 0;
-  numEsecvec = 0;
   numdisp = 0;
   electron_e.clear();
   electron_pt.clear();
@@ -453,21 +439,18 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_poserrorx.clear();
   secvec_poserrory.clear();
   secvec_poserrorz.clear();
-  secvec_eleTag.clear();
-  secvec_chi2.clear();
-  secvec_nodf.clear();
-  secvec_normchi2.clear();
 
-  Esecvec_posx.clear();
-  Esecvec_posy.clear();
-  Esecvec_posz.clear();
-  Esecvec_poserrorx.clear();
-  Esecvec_poserrory.clear();
-  Esecvec_poserrorz.clear();
-  Esecvec_eleTag.clear();
-  Esecvec_chi2.clear();
-  Esecvec_nodf.clear();
-  Esecvec_normchi2.clear();
+  //secvec_disp.clear();
+  //secvec_dispR.clear();
+  //secvec_deltaR.clear();
+  secvec_phi.clear();
+  secvec_eta.clear();
+  secvec_deltaR1.clear();
+  secvec_phi1.clear();
+  secvec_eta1.clear();
+  secvec_deltaR2.clear();
+  secvec_phi2.clear();
+  secvec_eta2.clear();
   //electron_Bsecvec.clear();
   electron_BdR.clear();
   electron_secN.clear();
@@ -680,13 +663,13 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   {
      if(itTrack1->pt()>1){
         //cout<<"check\n";
-      	float DR_ET = deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
-      	if(DR_ET<saveDR){
-      	  saveDR=DR_ET;
-      	  identyTrack[k]=j;//track idex thta best fit Electrons
+	float DR_ET = deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
+	if(DR_ET<saveDR){
+	  saveDR=DR_ET;
+	  identyTrack[k]=j;//track idex thta best fit Electrons
         }
         j++;
-     }
+     //}
   }
  //}
 
@@ -700,23 +683,22 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
   {
      if(itTrack1->pt()>1){
       	if(j==identyTrack[k]){
-      	   /*auto trk1=itElec1->gsfTrack();
-      	   auto DRtest=deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
-      	   cout<<trk1->pt()<<' '<<j<<' '<< itTrack1->pt()<<' '<<DRtest<<endl;
-      	   cout<<"   "<<trk1->quality(reco::Track::highPurity)<<' '<<itTrack1->quality(reco::Track::highPurity);
-      	   cout<<' '<<itTrack1->normalizedChi2()<<' ';
-      	   cout<<itTrack1->dxy(beamspot.position())<<' '<<itTrack1->dz(beamspot.position())<<' '<<itTrack1->d0Error()<<endl;*/
-      	   trk_isHQ.push_back(itTrack1->quality(reco::Track::highPurity));
-                 trk_NChi2.push_back(itTrack1->normalizedChi2());
-      	   trk_d0.push_back(itTrack1->dxy(beamspot.position()));
-      	   trk_d0E.push_back(itTrack1->d0Error());
-                 trk_dZ.push_back(itTrack1->dz(beamspot.position()));
-                 trk_dZE.push_back(itTrack1->dzError());
-      	   trk_Nlayer.push_back(itTrack1->hitPattern().trackerLayersWithMeasurement());
-         }
+	   /*auto trk1=itElec1->gsfTrack();
+	   auto DRtest=deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
+	   cout<<trk1->pt()<<' '<<j<<' '<< itTrack1->pt()<<' '<<DRtest<<endl;
+	   cout<<"   "<<trk1->quality(reco::Track::highPurity)<<' '<<itTrack1->quality(reco::Track::highPurity);
+	   cout<<' '<<itTrack1->normalizedChi2()<<' ';
+	   cout<<itTrack1->dxy(beamspot.position())<<' '<<itTrack1->dz(beamspot.position())<<' '<<itTrack1->d0Error()<<endl;*/
+	   trk_isHQ.push_back(itTrack1->quality(reco::Track::highPurity));
+           trk_NChi2.push_back(itTrack1->normalizedChi2());
+	   trk_d0.push_back(itTrack1->dxy(beamspot.position()));
+	   trk_d0E.push_back(itTrack1->d0Error());
+           trk_dZ.push_back(itTrack1->dz(beamspot.position()));
+           trk_dZE.push_back(itTrack1->dzError());
+	   trk_Nlayer.push_back(itTrack1->hitPattern().trackerLayersWithMeasurement());
 
-	      }
-	      j++;
+	}
+	j++;
      //}
   }
  }
@@ -735,7 +717,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
  //electron_Bsecvec.push_back(-1);//initialyzing best secondary vertex vector
 }
 
-for(size_t x =0; x<myelectrons->size(); x++){trk_identity.push_back(identyTrack[x]);}
+for(size_t x =0; x<myelectrons->size(); x++)trk_identity.push_back(identyTrack[x]);
 
 ////////////////////////////////////////////////////////////////////
 
@@ -744,394 +726,145 @@ for(size_t x =0; x<myelectrons->size(); x++){trk_identity.push_back(identyTrack[
 //fin identifier
 
 vector<float> savedisp (myelectrons->size());
-vector<TransientVertex> myVertices;
-KalmanVertexFitter fitter;
 //float savedisp[myelectrons.size()];
 int  i=0;
 for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        itTrack1 != tracks->end();
        ++itTrack1)
 {
-  if(itTrack1->pt()>1 && itTrack1->quality(reco::Track::highPurity) ){
+  if(itTrack1->pt()>1){   if(itTrack1->quality(reco::Track::highPurity) ){
       //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
       int	j2=0;
-      for(TrackCollection::const_iterator itTrack2 = itTrack1+1;
+      for(TrackCollection::const_iterator itTrack2 = tracks->begin();
          itTrack2 != tracks->end();
          ++itTrack2)
          {
 
            if( itTrack2->pt()>1 && itTrack2->quality(reco::Track::highPurity) ){
+            	//int j3=0;
+            	//for(TrackCollection::const_iterator itTrack3 = tracks->begin(); itTrack3 != tracks->end(); ++itTrack3){
+              	//if( itTrack3->pt()>1 && itTrack3->quality(reco::Track::highPurity) ){
+                           KalmanVertexFitter fitter;
+                           vector<TransientTrack> trackVec;
 
-             vector<TransientTrack> trackVec;
+                           if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
+                        	  //if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
 
-             if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
-          	  //if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
+                        	   /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
+                        	   cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
+                        	   cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
 
-          	   /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
-          	   cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
-          	   cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
+                                   //auto trk1 = itElec1->gsfTrack();
+                                   TransientTrack t_trk1 = (* theB).build(* itTrack1);
 
-                     //auto trk1 = itElec1->gsfTrack();
-                     TransientTrack t_trk1 = (* theB).build(* itTrack1);
+                                   //auto trk2 = itElec2->gsfTrack();
+                                   TransientTrack t_trk2 = (* theB).build(* itTrack2);
+                        	         //TransientTrack t_trk3 = (* theB).build(* itTrack3);
 
-                     //auto trk2 = itElec2->gsfTrack();
-                     TransientTrack t_trk2 = (* theB).build(* itTrack2);
-          	         //TransientTrack t_trk3 = (* theB).build(* itTrack3);
+                                   trackVec.push_back(t_trk1);
+                                   trackVec.push_back(t_trk2);
+                        	         //trackVec.push_back(t_trk3);
+                                   TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
+                        	         trackVec.clear();
 
-                     trackVec.push_back(t_trk1);
-                     trackVec.push_back(t_trk2);
-          	         //trackVec.push_back(t_trk3);
-                     TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
-          	         trackVec.clear();
+                                //int k=0;//este K es para el numero de desplazamientos
+                               if(myVertex.isValid()){
+                              	  numsecvec++;
+                              	  secvec_posx.push_back(myVertex.position().x());
+                                	secvec_posy.push_back(myVertex.position().y());
+                                	secvec_posz.push_back(myVertex.position().z());
+                                	secvec_poserrorx.push_back(myVertex.positionError().cxx());
+                                	secvec_poserrory.push_back(myVertex.positionError().cyy());
+                                	secvec_poserrorz.push_back(myVertex.positionError().czz());
+                                  //Delta R entre Track1 Y electron en electron_BdR
+                                  secvec_phi.push_back(itTrack1->phi());
+                                  secvec_eta.push_back(itTrack1->eta());
+                                  secvec_deltaR1.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack2->eta(),itTrack2->phi()));
+                                  secvec_phi1.push_back(itTrack2->phi());
+                                  secvec_eta1.push_back(itTrack2->eta());
+                                  secvec_deltaR2.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack3->eta(),itTrack3->phi()));
+                                  secvec_phi2.push_back(itTrack3->phi());
+                                  secvec_eta2.push_back(itTrack3->eta());
+                                  for (size_t k=0; k<myelectrons->size(); k++){
+                                    if(identyTrack[k]==i) secvec_eleTag.push_back(k);
+                                    else secvec_eleTag.push_back(-1);
+                                  }
+                              	/*for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
+                              	{
+                                           numdisp++;//total of secondary vertex disp per event
+                              	     k++;//# of saved disp per SecondaryVertex
 
-                  //int k=0;//este K es para el numero de desplazamientos
-                 if(myVertex.isValid()){
-                    myVertices.push_back(myVertex);
-                  }
-          	//}//nonequal Tracks condition 3-2 3-1
-           }//Nonequal Tracks condition 1-2
+                              	     //primaryvertex
+                              	     //cout<<"ptE: "<<itElec1->pt()<<endl;
+                                           //cout<<"pvx: "<< itElec1->vx()<<" pvy: "<<itElec1->vy()<<" pvz: "<< itElec1->vz()<<endl;
+                                           //cout<<"phiE: "<<itElec1->phi()<<" etaE: "<<itElec1->eta()<<" phiT: "<<itTrack1->phi()<<" etaT: "<<itTrack1->eta()<<endl;
+                              	     //float deltaR_ET=deltaR(itElec1->phi(),itElec1->eta(),itTrack1->phi(),itTrack1->eta());
+                              	     //cout<<"deltaR-ET: "<<deltaR_ET<<endl;
+
+                                           //secondaryvertex
+                                           //cout<<"PosX: "<< myVertex.position().x()<<" PosY: "<<myVertex.position().y()<<" PosZ: "<<myVertex.position().z()<<endl;
+                                           dispx= itElec1->vx()-myVertex.position().x();
+                                           dispy= itElec1->vy()-myVertex.position().y();
+                                           dispz= itElec1->vz()-myVertex.position().z();
+
+                                           //error calculation + displacement
+                                           xerr=myVertex.positionError().cxx();
+                                           yerr=myVertex.positionError().cyy();
+                                           zerr=myVertex.positionError().czz();
+
+                                           float difx = (myVertex.position().x())/(sqrt((xerr*xerr)+(yerr*yerr)+(zerr*zerr)));
+                                           float dify = (myVertex.position().y())/(sqrt((xerr*xerr)+(yerr*yerr)+(zerr*zerr)));
+                                           float difz = (myVertex.position().z())/(sqrt((xerr*xerr)+(yerr*yerr)+(zerr*zerr)));
+                                           float err  = sqrt(difx*difx*xerr+dify*dify*yerr+difz*difz*zerr);
+
+                                          disp= sqrt(dispx*dispx + dispy*dispy + dispz*dispz);
+                                           //cout<<"Displacement: "<<disp<<endl;
+                                           dispR= sqrt(dispx*dispx + dispy*dispy + dispz*dispz)/err;
+                              	     //cout<<"Weigthed Displacement: "<<dispR<<'\n'<<endl;
+
+
+                                           //displacements store
+                              	     secvec_disp.push_back(disp);
+                                           float totDR=1.5;
+                                           if(dispR<totDR){secvec_dispR.push_back(dispR);}
+                                           else{secvec_dispR.push_back(totDR);}
+
+                                           //DeltaR identification
+                                           float DeltaRPrima = deltaR(itElec1->eta(),itElec1->phi(),itTrack1->eta(),itTrack1->phi());
+                              	     //cout<<"DeltaR: "<<DeltaRPrima<<'\n'<<endl;
+
+                                           secvec_deltaR.push_back(DeltaRPrima);
+                                           secvec_deltaR1.push_back(deltaR(itElec1->eta(),itElec1->phi(),itTrack2->eta(),itTrack2->phi()));
+                                           secvec_deltaR2.push_back(deltaR(itElec1->eta(),itElec1->phi(),itTrack3->eta(),itTrack3->phi()));
+
+                              	     //find best secvec
+                                           if(identyTrack[k-1]==i)
+                              	     {
+                              		//cout<<itTrack1->quality(reco::Track::highPurity)<<"\n ";
+                                              //cout<<itTrack1->pt()<<' '<<itElec1->pt()<<' '<<itElec1->eta()<<endl;
+                                  		if(dispR > savedisp.at(k-1))
+                                  		{
+                                  		  savedisp.at(k-1)=dispR;
+                                  		  electron_Bsecvec.at(k-1)=numdisp;
+                                  		}
+                              	     }
+
+                              	 }*/// for itElec
+
+                                }
+                        	}//nonequal Tracks condition 3-2 3-1
+                         }//Nonequal Tracks condition 1-2
+                    //}
+                    //j3++;
+                  //}//for Track3
          }
          j2++;
       }
       i++;
-  }//final if pt track HQ track
+  }//final HQ track
+ }//finalde if pt track
 }//fin for Track1
 electron_secN.push_back(i);
-
-//cout<<"\n\n\n Number of vertices before merging: "<<myVertices.size()<<"\n\n\n";
-
-///////////////////////Merging vertices////////////////////////////////
-vector<TransientVertex> tmpVertices;//temporal vertices storage use for iterations
-vector<TransientVertex> finalVertices;//Vertices Fully merged and filtered
-vector<TransientTrack> Otrk1;//Original tracks stoage use for iterations
-vector<TransientTrack> Otrk2;//Original tracks stoage use for iterations
-vector<TransientTrack> Otrktmp;//Merged Original tracks storage use for Vertex fitting
-vector<size_t> Vfound;//Storage for vertices that were already compared and similed
-vector<size_t> Tfound;//Storage for tracks that were compared and similed
-bool rSimil=true;//flag whenever a two similar tracks where found if not found any end merging
-bool Vf=false;//refered to Vfound flag tells if the iterand vertex aws already compared
-bool Similf=false;// refered to Tfound flag tells if the iterand track is repeated between two vertices. Avoid reapeting tracks in Otrktmp
-size_t its=0;// counts number of iterations
-size_t vertexcount=0;//counts number of merged vertices
-finalVertices.clear();
-
-while(rSimil && its<50){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
-  /////Initialize storage and flags////
-  tmpVertices=myVertices;
-  myVertices.clear();
-  vertexcount=0;
-  rSimil=false;
-  Vfound.clear();
-  ///////////////////////////////////
-  its++;//count iterations
-  for(size_t x=0; x<tmpVertices.size(); x++){////iteration over the all vertices/////
-    //cout<<"1st it flag "<<x<<endl;
-    bool Vsimil=false;///// Flag tells if the vertex share tracks with another. guarantees only storing not mergeable vertices
-
-    //bool Vrepeat=false;
-    size_t repeatcount=0;//// Counter tells how many times a vertex is repeting in the storage. I.e. whenever two vertices have the same number of tracks and all are equal.
-    Vf=false;//initialize
-    Otrk1.clear();//initialize
-
-    for(size_t i=0; i<Vfound.size(); i++){if(Vfound.at(i)==x)Vf=true;}//omit comparing a vertex that was already merged
-
-    if(tmpVertices.at(x).normalisedChiSquared()<5 && !Vf){// quality check plus already merged vertex check
-      Otrk1=tmpVertices.at(x).originalTracks();// extract original tracks from first compared vertex
-      for(size_t y=x+1; y<tmpVertices.size(); y++){/// iteration over all vertices
-        //cout<<" 2nd it Flag "<<y<<endl;
-        size_t similcount=0;//initialize
-        Tfound.clear();//Restart Found tracks
-
-        Vf=false;//Restart alread merged flag
-        Otrk2.clear();// restart track container
-
-        for(size_t i=0; i<Vfound.size(); i++){if(Vfound.at(i)==y)Vf=true;}//tell if the current vertex was already compared and merged
-
-        if(tmpVertices.at(y).normalisedChiSquared()<5 && !Vf){ //quality check plus already merged check
-          Otrktmp.clear();//restart Temporal track Storage
-          Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
-          for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
-            for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
-              if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
-                 && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() ){ //check whenever a track is shared in both sets
-                   //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
-                   //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
-                   //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
-                   similcount++;// count number of similar tracks from each set
-                   rSimil=true;// FLag there are mergeable vertices
-                   //breakSimil=true;
-                   Otrktmp=Otrk1;// store all track from first set
-                   Vfound.push_back(y);// store index of already compared and merged vertex
-                   Tfound.push_back(v);// store index of already compared and similar track
-                   Vsimil=true;//Flag the compared vertex is mergeable
-                   //break;
-                 }
-            }
-            //if(breakSimil) break;
-          }
-          if(similcount!=0){//check if two vertices share tracks
-            for(size_t w=0; w<Otrk2.size(); w++){//iteration over second set of tracks
-              Similf=false;//reset flag track is repeated
-              for(size_t s=0; s<Tfound.size(); s++){if(w==Tfound.at(s)) Similf=true;}//checks flag if track is repeated
-              if(!Similf) Otrktmp.push_back(Otrk2.at(w));// if track is not repeated store in temporal track storage
-            }
-          }
-          //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
-          ////poner aqui el Fitter
-          //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
-          //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
-          if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size())repeatcount++;// if two or more vertex are identical count
-          /*if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
-            break;
-          }*/
-          if(Otrktmp.size()>2 && repeatcount<2){//check if temporal track could be fitted check if the identical vertex where already merged
-            //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
-            //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
-            TransientVertex myVertex = fitter.vertex(Otrktmp);//fiit vertex
-            if(myVertex.isValid()){// sanity check
-              vertexcount++;// count number of vertices
-              myVertices.push_back(myVertex);//restore merged vertices
-            }
-          }
-        }
-      }
-      if(!Vsimil && tmpVertices.at(x).normalisedChiSquared()<5) finalVertices.push_back(tmpVertices.at(x));// if track is not mergeable and is good store as final vertex
-      //cout<<"Simil vertices: "<<similcount<<endl;
-    }
-  }
-  //cout<<" Valid vertex "<< vertexcount<<endl;
-  //cout<<"\n\n\n Number of vertices after merging: "<<myVertices.size()<<" Final vertices: "<<finalVertices.size()<<"\n\n\n";
-}
-//cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
-/////////////Mergin fin////////////////////////
-for(size_t x=0; x<finalVertices.size(); x++){
-  TransientVertex myV=finalVertices.at(x);
-  Otrk1.clear();
-  numsecvec++;
-  secvec_posx.push_back(myV.position().x());
-  secvec_posy.push_back(myV.position().y());
-  secvec_posz.push_back(myV.position().z());
-  secvec_poserrorx.push_back(myV.positionError().cxx());
-  secvec_poserrory.push_back(myV.positionError().cyy());
-  secvec_poserrorz.push_back(myV.positionError().czz());
-  secvec_chi2.push_back(myV.totalChiSquared());
-  secvec_nodf.push_back(myV.degreesOfFreedom());
-  secvec_normchi2.push_back(myV.normalisedChiSquared());
-  secvec_eleTag.push_back(-1);
-
-  Otrk1=myV.originalTracks();
-
-  //cout<<"Vertex number of tracks "<<Otrk1.size()<<endl;
-  int k=0;
-  for(TrackCollection::const_iterator itTrack1 = tracks->begin(); itTrack1 != tracks->end(); ++itTrack1){
-    //bool trackId=false;
-    if(itTrack1->pt()>1){
-      k++;
-      for(size_t y=0; y!=myelectrons->size();y++){
-        if(identyTrack[y]==k){
-          for(size_t z=0; z<Otrk1.size(); z++){
-            if(deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),itTrack1->eta(),itTrack1->phi())==0
-              && Otrk1.at(z).track().pt()==itTrack1->pt()){
-                secvec_eleTag.back()=y;
-              }
-          }
-        }
-      }
-
-    }
-  }
-
-
-  //Delta R entre Track1 Y electron en electron_BdR
-  /*secvec_phi.push_back(itTrack1->phi());
-  secvec_eta.push_back(itTrack1->eta());
-  secvec_deltaR1.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack2->eta(),itTrack2->phi()));
-  secvec_phi1.push_back(itTrack2->phi());
-  secvec_eta1.push_back(itTrack2->eta());
-  secvec_deltaR2.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack3->eta(),itTrack3->phi()));
-  secvec_phi2.push_back(itTrack3->phi());
-  secvec_eta2.push_back(itTrack3->eta());*/
-}
-//cout<<"\n Nsize: "<<secvec_chi2.size()<<" Tag size: "<<secvec_eleTag.size()<<" electron size "<<myelectrons->size()<<"\n\n";
-
-
-
-//////////////////////////////////////////Making secondary vertices with electron tracks///////////////////////////////
-///////////////plan iterate all electron track with hq tracks to form vertices and then merge them all
-bool Eletrack;
-int EleCount=0;
-for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1){
-  Eletrack=false;
-  i=0;
-  for(TrackCollection::const_iterator itTrack1 = tracks->begin();
-         itTrack1 != tracks->end();
-         ++itTrack1)
-  {
-    if( itTrack1->pt()>1){
-      if(i==identyTrack[EleCount]) Eletrack=true;
-      if( Eletrack && itTrack1->quality(reco::Track::highPurity) ){
-        //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
-        int	j2=0;
-        for(TrackCollection::const_iterator itTrack2 = itTrack1+1;
-           itTrack2 != tracks->end();
-           ++itTrack2)
-           {
-
-             if( itTrack2->pt()>1 && itTrack2->quality(reco::Track::highPurity) ){
-
-               vector<TransientTrack> trackVec;
-
-               if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
-                //if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
-
-                 /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
-                 cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
-                 cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
-
-                       //auto trk1 = itElec1->gsfTrack();
-                       TransientTrack t_trk1 = (* theB).build(* itTrack1);
-
-                       //auto trk2 = itElec2->gsfTrack();
-                       TransientTrack t_trk2 = (* theB).build(* itTrack2);
-                       //TransientTrack t_trk3 = (* theB).build(* itTrack3);
-
-                       trackVec.push_back(t_trk1);
-                       trackVec.push_back(t_trk2);
-                       //trackVec.push_back(t_trk3);
-                       TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
-                       trackVec.clear();
-
-                    //int k=0;//este K es para el numero de desplazamientos
-                   if(myVertex.isValid()){
-                      myVertices.push_back(myVertex);
-                    }
-              //}//nonequal Tracks condition 3-2 3-1
-             }//Nonequal Tracks condition 1-2
-           }
-           j2++;
-        }
-      }
-        i++;
-    }//final if pt track HQ track
-  }//fin for Track1
-  electron_secN.push_back(i);
-  cout<<"\n\n\n Number of Ele vertices before merging: "<<myVertices.size()<<"\n\n\n";
-  ///MErging electrons Vertices
-  rSimil=true;//flag whenever a two similar tracks where found if not found any end merging
-  Vf=false;//refered to Vfound flag tells if the iterand vertex aws already compared
-  Similf=false;// refered to Tfound flag tells if the iterand track is repeated between two vertices. Avoid reapeting tracks in Otrktmp
-  its=0;// counts number of iterations
-  vertexcount=0;//counts number of merged vertices
-  finalVertices.clear();
-
-  while(rSimil && its<50){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
-    /////Initialize storage and flags////
-    tmpVertices=myVertices;
-    myVertices.clear();
-    vertexcount=0;
-    rSimil=false;
-    Vfound.clear();
-    ///////////////////////////////////
-    its++;//count iterations
-    for(size_t x=0; x<tmpVertices.size(); x++){////iteration over the all vertices/////
-      //cout<<"1st it flag "<<x<<endl;
-      bool Vsimil=false;///// Flag tells if the vertex share tracks with another. guarantees only storing not mergeable vertices
-
-      //bool Vrepeat=false;
-      size_t repeatcount=0;//// Counter tells how many times a vertex is repeting in the storage. I.e. whenever two vertices have the same number of tracks and all are equal.
-      Vf=false;//initialize
-      Otrk1.clear();//initialize
-
-      for(size_t i=0; i<Vfound.size(); i++){if(Vfound.at(i)==x)Vf=true;}//omit comparing a vertex that was already merged
-
-      if(tmpVertices.at(x).normalisedChiSquared()<5 && !Vf){// quality check plus already merged vertex check
-        Otrk1=tmpVertices.at(x).originalTracks();// extract original tracks from first compared vertex
-        for(size_t y=x+1; y<tmpVertices.size(); y++){/// iteration over all vertices
-          //cout<<" 2nd it Flag "<<y<<endl;
-          size_t similcount=0;//initialize
-          Tfound.clear();//Restart Found tracks
-
-          Vf=false;//Restart alread merged flag
-          Otrk2.clear();// restart track container
-
-          for(size_t i=0; i<Vfound.size(); i++){if(Vfound.at(i)==y)Vf=true;}//tell if the current vertex was already compared and merged
-
-          if(tmpVertices.at(y).normalisedChiSquared()<5 && !Vf){ //quality check plus already merged check
-            Otrktmp.clear();//restart Temporal track Storage
-            Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
-            for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
-              for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
-                if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
-                   && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() ){ //check whenever a track is shared in both sets
-                     //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
-                     //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
-                     //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
-                     similcount++;// count number of similar tracks from each set
-                     rSimil=true;// FLag there are mergeable vertices
-                     //breakSimil=true;
-                     Otrktmp=Otrk1;// store all track from first set
-                     Vfound.push_back(y);// store index of already compared and merged vertex
-                     Tfound.push_back(v);// store index of already compared and similar track
-                     Vsimil=true;//Flag the compared vertex is mergeable
-                     //break;
-                   }
-              }
-              //if(breakSimil) break;
-            }
-            if(similcount!=0){//check if two vertices share tracks
-              for(size_t w=0; w<Otrk2.size(); w++){//iteration over second set of tracks
-                Similf=false;//reset flag track is repeated
-                for(size_t s=0; s<Tfound.size(); s++){if(w==Tfound.at(s)) Similf=true;}//checks flag if track is repeated
-                if(!Similf) Otrktmp.push_back(Otrk2.at(w));// if track is not repeated store in temporal track storage
-              }
-            }
-            //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
-            ////poner aqui el Fitter
-            //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
-            //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
-            if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size())repeatcount++;// if two or more vertex are identical count
-            /*if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
-              break;
-            }*/
-            if(Otrktmp.size()>2 && repeatcount<2){//check if temporal track could be fitted check if the identical vertex where already merged
-              //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
-              //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
-              TransientVertex myVertex = fitter.vertex(Otrktmp);//fiit vertex
-              if(myVertex.isValid()){// sanity check
-                vertexcount++;// count number of vertices
-                myVertices.push_back(myVertex);//restore merged vertices
-              }
-            }
-          }
-        }
-        if(!Vsimil && tmpVertices.at(x).normalisedChiSquared()<5) finalVertices.push_back(tmpVertices.at(x));// if track is not mergeable and is good store as final vertex
-        //cout<<"Simil vertices: "<<similcount<<endl;
-      }
-    }
-    //cout<<" Valid vertex "<< vertexcount<<endl;
-    //cout<<"\n\n\n Number of vertices after merging: "<<myVertices.size()<<" Final vertices: "<<finalVertices.size()<<"\n\n\n";
-  }
-  cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
-
-  for(size_t x=0; x<finalVertices.size(); x++){
-    TransientVertex myV=finalVertices.at(x);
-    Otrk1.clear();
-    numEsecvec++;
-    Esecvec_posx.push_back(myV.position().x());
-    Esecvec_posy.push_back(myV.position().y());
-    Esecvec_posz.push_back(myV.position().z());
-    Esecvec_poserrorx.push_back(myV.positionError().cxx());
-    Esecvec_poserrory.push_back(myV.positionError().cyy());
-    Esecvec_poserrorz.push_back(myV.positionError().czz());
-    Esecvec_chi2.push_back(myV.totalChiSquared());
-    Esecvec_nodf.push_back(myV.degreesOfFreedom());
-    Esecvec_normchi2.push_back(myV.normalisedChiSquared());
-    Esecvec_eleTag.push_back(EleCount);
-  }
-
-  EleCount++;
-}
-
 }// Final de Is ValidElectron
 
   mtree->Fill();
