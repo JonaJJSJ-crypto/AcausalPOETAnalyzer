@@ -962,7 +962,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
     }//final if pt track HQ track
   }//fin for Track1
   electron_secN.push_back(i);
-  cout<<"\n\n\n Number of Ele vertices before merging: "<<myVertices.size()<<"\n\n\n";
+  //cout<<"\n\n\n Number of Ele vertices before merging: "<<myVertices.size()<<"\n\n\n";
   ///MErging electrons Vertices
   rSimil=true;//flag whenever a two similar tracks where found if not found any end merging
   Vf=false;//refered to Vfound flag tells if the iterand vertex aws already compared
@@ -1058,7 +1058,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
     //cout<<" Valid vertex "<< vertexcount<<endl;
     //cout<<"\n\n\n Number of vertices after merging: "<<myVertices.size()<<" Final vertices: "<<finalVertices.size()<<"\n\n\n";
   }
-  cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
+  //cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
 
   for(size_t x=0; x<finalVertices.size(); x++){
     TransientVertex myV=finalVertices.at(x);
