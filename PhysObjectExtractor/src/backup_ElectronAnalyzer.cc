@@ -5,6 +5,7 @@
 
 // system include files
 #include <memory>
+#include <algorithm>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -47,7 +48,7 @@
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
-#include<vector>
+#include <vector>
 
 //
 // class declaration
@@ -799,8 +800,22 @@ while(rSimil && its<50){// lasso while stops whenever there are not vertices lef
           Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
           for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
             for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
+              /////check if two vertices are close enough
+              float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
+                                +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
+                                +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
+              float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
+                                +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
+                                +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
+              Sigma1=min(Sigma1,Sigma2);
+              float dx,dy,dz, dist;
+              dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
+              dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
+              dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
+              dist= sqrt(dx*dx+dy*dy+dz*dz);
+
               if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
-                 && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() ){ //check whenever a track is shared in both sets
+                 && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() && dist<Sigma1){ //check whenever a track is shared in both sets
                    //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
                    //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
                    //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
@@ -1008,8 +1023,22 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
             Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
             for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
               for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
+                /////check if two vertices are close enough
+                float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
+                                  +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
+                                  +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
+                float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
+                                  +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
+                                  +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
+                Sigma1=min(Sigma1,Sigma2);
+                float dx,dy,dz, dist;
+                dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
+                dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
+                dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
+                dist= sqrt(dx*dx+dy*dy+dz*dz);
+
                 if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
-                   && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() ){ //check whenever a track is shared in both sets
+                   && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() && dist<4*Sigma1){ //check whenever a track is shared in both sets
                      //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
                      //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
                      //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
