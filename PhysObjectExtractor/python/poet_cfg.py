@@ -231,7 +231,7 @@ process.mytriggers = cms.EDAnalyzer('TriggerAnalyzer',
 #---- A previous trigger study would be needed to cut hard on a given trigger or set of triggers
 #---- The filter can be added to the path below if needed but is not applied by default
 process.load("HLTrigger.HLTfilters.hltHighLevel_cfi")
-process.hltHighLevel.HLTPaths = cms.vstring('HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50')
+process.hltHighLevel.HLTPaths = cms.vstring("HLT_Photon36_CaloId10_Iso50_Photon22_CaloId10_Iso50_v*", "HLT_Photon36_CaloId10_Iso50_Photon22_R9Id85_v*",  "HLT_Photon36_R9Id85_Photon22_CaloId10_Iso50_v*", "HLT_Photon36_R9Id85_Photon22_R9Id85_v*")
 
 
 
@@ -272,6 +272,5 @@ process.TFileService = cms.Service(
 if doPat:
 	process.p = cms.Path(process.patDefaultSequence+process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
 else:
-	if isData: process.p = cms.Path(process.elefilter + process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
-	else: process.p = cms.Path(process.elefilter + process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents+process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
-
+	if isData: process.p = cms.Path(process.hltHighLevel + process.elefilter + process.myevents+process.myelectrons + process.mymuons+process.myphotons+process.myjets + process.mymets+process.mytaus+process.mytrigEvent+process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
+        else: process.p = cms.Path(process.hltHighLevel + process.elefilter + process.selectedHadronsAndPartons * process.jetFlavourInfosAK5PFJets * process.myevents + process.myelectrons+process.mymuons+process.myphotons+process.myjets+process.mymets + process.mytaus+process.mytrigEvent + process.mypvertex+process.mytracks+process.mygenparticle+process.mytriggers)
