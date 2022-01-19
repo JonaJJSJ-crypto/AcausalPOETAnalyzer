@@ -5,7 +5,6 @@
 
 // system include files
 #include <memory>
-#include <algorithm>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -48,7 +47,7 @@
 //classes to save data
 #include "TTree.h"
 #include "TFile.h"
-#include <vector>
+#include<vector>
 
 //
 // class declaration
@@ -514,9 +513,12 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
       electron_px.push_back(itElec->px());
       electron_py.push_back(itElec->py());
       electron_pz.push_back(itElec->pz());
-      //electron_vx.push_back(itElec->vxerror());
-      //electron_vy.push_back(itElec->vyerror());
-      //electron_vz.push_back(itElec->vzerror());
+      electron_px.push_back(itElec->vx());
+      electron_py.push_back(itElec->vy());
+      electron_pz.push_back(itElec->vz());
+      //electron_px.push_back(itElec->vxerror());
+      //electron_py.push_back(itElec->vyerror());
+      //electron_pz.push_back(itElec->pzvzerror());
       electron_eta.push_back(itElec->eta());
       electron_phi.push_back(itElec->phi());
       electron_ch.push_back(itElec->charge());
@@ -547,7 +549,7 @@ if(!isData){
      if(id==11 && st==1){genElec.emplace_back(p);}
    }
    numgenelec=genElec.size();
-   //Comparing deltaR Genveco
+   //Comparing deltaR GenvsReco
      //cout<<"\n\n No.Reco: "<<myelectrons->size()<<" No.Gen: "<<genElec.size()<<"\n\n"<<endl;
 
    for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1)
@@ -659,8 +661,10 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
                  trk_dZE.push_back(itTrack1->dzError());
       	   trk_Nlayer.push_back(itTrack1->hitPattern().trackerLayersWithMeasurement());
          }
+
+	      }
 	      j++;
-      }
+     //}
   }
  }
  else {
@@ -758,7 +762,7 @@ size_t its=0;// counts number of iterations
 size_t vertexcount=0;//counts number of merged vertices
 finalVertices.clear();
 
-while(rSimil && its<150){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
+while(rSimil && its<50){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
   /////Initialize storage and flags////
   tmpVertices=myVertices;
   myVertices.clear();
@@ -795,22 +799,8 @@ while(rSimil && its<150){// lasso while stops whenever there are not vertices le
           Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
           for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
             for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
-              /////check if two vertices are close enough
-              /*float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
-                                +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
-                                +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
-              float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
-                                +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
-                                +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
-              Sigma1=min(Sigma1,Sigma2);
-              float dx,dy,dz, dist;
-              dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
-              dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
-              dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
-              dist= sqrt(dx*dx+dy*dy+dz*dz);*/
-
               if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
-                 && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt()){// && dist<4*Sigma1){ //check whenever a track is shared in both sets
+                 && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() ){ //check whenever a track is shared in both sets
                    //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
                    //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
                    //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
@@ -897,6 +887,17 @@ for(size_t x=0; x<finalVertices.size(); x++){
 
     }
   }
+
+
+  //Delta R entre Track1 Y electron en electron_BdR
+  /*secvec_phi.push_back(itTrack1->phi());
+  secvec_eta.push_back(itTrack1->eta());
+  secvec_deltaR1.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack2->eta(),itTrack2->phi()));
+  secvec_phi1.push_back(itTrack2->phi());
+  secvec_eta1.push_back(itTrack2->eta());
+  secvec_deltaR2.push_back(deltaR(itTrack1->eta(),itTrack1->phi(),itTrack3->eta(),itTrack3->phi()));
+  secvec_phi2.push_back(itTrack3->phi());
+  secvec_eta2.push_back(itTrack3->eta());*/
 }
 //cout<<"\n Nsize: "<<secvec_chi2.size()<<" Tag size: "<<secvec_eleTag.size()<<" electron size "<<myelectrons->size()<<"\n\n";
 
@@ -904,7 +905,7 @@ for(size_t x=0; x<finalVertices.size(); x++){
 
 //////////////////////////////////////////Making secondary vertices with electron tracks///////////////////////////////
 ///////////////plan iterate all electron track with hq tracks to form vertices and then merge them all
-/*bool Eletrack;
+bool Eletrack;
 int EleCount=0;
 for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1){
   Eletrack=false;
@@ -930,9 +931,9 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
                if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
                 //if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
 
-                 //cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
-                 //cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
-                 //cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;
+                 /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
+                 cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
+                 cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
 
                        //auto trk1 = itElec1->gsfTrack();
                        TransientTrack t_trk1 = (* theB).build(* itTrack1);
@@ -961,7 +962,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
     }//final if pt track HQ track
   }//fin for Track1
   electron_secN.push_back(i);
-  //cout<<"\n\n\n Number of Ele vertices before merging: "<<myVertices.size()<<"\n\n\n";
+  cout<<"\n\n\n Number of Ele vertices before merging: "<<myVertices.size()<<"\n\n\n";
   ///MErging electrons Vertices
   rSimil=true;//flag whenever a two similar tracks where found if not found any end merging
   Vf=false;//refered to Vfound flag tells if the iterand vertex aws already compared
@@ -970,7 +971,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
   vertexcount=0;//counts number of merged vertices
   finalVertices.clear();
 
-  while(rSimil && its<150){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
+  while(rSimil && its<50){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
     /////Initialize storage and flags////
     tmpVertices=myVertices;
     myVertices.clear();
@@ -1007,22 +1008,8 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
             Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
             for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
               for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
-                /////check if two vertices are close enough
-                float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
-                                  +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
-                                  +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
-                float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
-                                  +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
-                                  +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
-                Sigma1=min(Sigma1,Sigma2);
-                float dx,dy,dz, dist;
-                dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
-                dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
-                dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
-                dist= sqrt(dx*dx+dy*dy+dz*dz);
-
                 if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
-                   && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt()){// && dist<4*Sigma1){ //check whenever a track is shared in both sets
+                   && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt() ){ //check whenever a track is shared in both sets
                      //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
                      //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
                      //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
@@ -1050,9 +1037,9 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
             //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
             //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
             if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size())repeatcount++;// if two or more vertex are identical count
-            //if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
-              //break;
-            //}
+            /*if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
+              break;
+            }*/
             if(Otrktmp.size()>2 && repeatcount<2){//check if temporal track could be fitted check if the identical vertex where already merged
               //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
               //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
@@ -1071,7 +1058,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
     //cout<<" Valid vertex "<< vertexcount<<endl;
     //cout<<"\n\n\n Number of vertices after merging: "<<myVertices.size()<<" Final vertices: "<<finalVertices.size()<<"\n\n\n";
   }
-  //cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
+  cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
 
   for(size_t x=0; x<finalVertices.size(); x++){
     TransientVertex myV=finalVertices.at(x);
@@ -1090,7 +1077,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
   }
 
   EleCount++;
-}*/
+}
 
 }// Final de Is ValidElectron
 
