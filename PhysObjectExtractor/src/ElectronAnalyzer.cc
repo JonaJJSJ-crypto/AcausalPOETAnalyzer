@@ -134,6 +134,9 @@ private:
   std::vector<float> secvec_chi2;
   std::vector<float> secvec_nodf;
   std::vector<float> secvec_normchi2;
+  std::vector<float> secvec_px;
+  std::vector<float> secvec_py;
+  std::vector<float> secvec_pz;
 
   std::vector<float> Esecvec_posx;
   std::vector<float> Esecvec_posy;
@@ -285,6 +288,12 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_normchi2")->SetTitle("Vertex normalized chi squared");
   mtree->Branch("secvec_nodf",&secvec_nodf);
   mtree->GetBranch("secvec_nodf")->SetTitle("Track number of degree of freedom");
+  mtree->Branch("secvec_px",&secvec_px);
+  mtree->GetBranch("secvec_px")->SetTitle("secvec total momentum (GeV)");
+  mtree->Branch("secvec_py",&secvec_py);
+  mtree->GetBranch("secvec_py")->SetTitle("secvec total momentum (GeV)");
+  mtree->Branch("secvec_pz",&secvec_pz);
+  mtree->GetBranch("secvec_pz")->SetTitle("secvec total momentum (GeV)");
 
   mtree->Branch("Esecvec_posx",&Esecvec_posx);
   mtree->GetBranch("Esecvec_posx")->SetTitle("secvec position x (mm)");
@@ -427,6 +436,9 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_chi2.clear();
   secvec_nodf.clear();
   secvec_normchi2.clear();
+  secvec_px.clear();
+  secvec_py.clear();
+  secvec_pz.clear();
 
   Esecvec_posx.clear();
   Esecvec_posy.clear();
@@ -877,6 +889,18 @@ for(size_t x=0; x<finalVertices.size(); x++){
   secvec_eleTag.push_back(-1);
 
   Otrk1=myV.originalTracks();
+  float px=0,py=0,pz=0;
+  //cout<<Otrk1.size()<<endl;
+  for(size_t z=0; z<Otrk1.size(); z++){
+    //cout<<' '<<Otrk1.at(z).track().px()<<' '<<Otrk1.at(z).track().py()<<' '<<Otrk1.at(z).track().pz()<<endl;
+    px=px+Otrk1.at(z).track().px();
+    py=py+Otrk1.at(z).track().py();
+    pz=pz+Otrk1.at(z).track().pz();
+  }
+  secvec_px.push_back(px);
+  secvec_py.push_back(py);
+  secvec_pz.push_back(pz);
+  //cout<<' '<<px<<' '<<pz<<' '<<pz<<endl;
 
   //cout<<"Vertex number of tracks "<<Otrk1.size()<<endl;
   int k=0;
@@ -923,35 +947,36 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
            ++itTrack2)
            {
 
-             if( itTrack2->pt()>1 && itTrack2->quality(reco::Track::highPurity) ){
+             if( itTrack2->pt()>7  && itTrack2->quality(reco::Track::highPurity) ){
 
                vector<TransientTrack> trackVec;
 
-               if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
-                //if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
+               if(t_tks.size()>3 && itTrack1->pt()!=itTrack2->pt()){
+                 for(TrackCollection::const_iterator itTrack3 = itTrack1+1;
+                    itTrack3 != tracks->end();
+                    ++itTrack3)
+                    {
+                      if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
+                        if( itTrack3->pt()>7  && itTrack3->quality(reco::Track::highPurity) ){
+                          //auto trk1 = itElec1->gsfTrack();
+                          TransientTrack t_trk1 = (* theB).build(* itTrack1);
 
-                 //cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
-                 //cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
-                 //cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;
+                          //auto trk2 = itElec2->gsfTrack();
+                          TransientTrack t_trk2 = (* theB).build(* itTrack2);
+                          TransientTrack t_trk3 = (* theB).build(* itTrack3);
 
-                       //auto trk1 = itElec1->gsfTrack();
-                       TransientTrack t_trk1 = (* theB).build(* itTrack1);
+                          trackVec.push_back(t_trk1);
+                          trackVec.push_back(t_trk2);
+                          trackVec.push_back(t_trk3);
+                          TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
+                          trackVec.clear();
 
-                       //auto trk2 = itElec2->gsfTrack();
-                       TransientTrack t_trk2 = (* theB).build(* itTrack2);
-                       //TransientTrack t_trk3 = (* theB).build(* itTrack3);
-
-                       trackVec.push_back(t_trk1);
-                       trackVec.push_back(t_trk2);
-                       //trackVec.push_back(t_trk3);
-                       TransientVertex myVertex = fitter.vertex(trackVec);//reconstruction of secondary vertex Sometimes
-                       trackVec.clear();
-
-                    //int k=0;//este K es para el numero de desplazamientos
-                   if(myVertex.isValid()){
-                      myVertices.push_back(myVertex);
+                          if(myVertex.isValid()){
+                             myVertices.push_back(myVertex);
+                           }
+                        }
+                      }
                     }
-              //}//nonequal Tracks condition 3-2 3-1
              }//Nonequal Tracks condition 1-2
            }
            j2++;
@@ -970,7 +995,27 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
   vertexcount=0;//counts number of merged vertices
   finalVertices.clear();
 
-  while(rSimil && its<150){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
+  for(size_t x=0; x<myVertices.size(); x++){
+    TransientVertex myV=myVertices.at(x);
+    if(myV.normalisedChiSquared()<5){
+      numEsecvec++;
+      Esecvec_posx.push_back(myV.position().x());
+      Esecvec_posy.push_back(myV.position().y());
+      Esecvec_posz.push_back(myV.position().z());
+      Esecvec_poserrorx.push_back(myV.positionError().cxx());
+      Esecvec_poserrory.push_back(myV.positionError().cyy());
+      Esecvec_poserrorz.push_back(myV.positionError().czz());
+      Esecvec_chi2.push_back(myV.totalChiSquared());
+      Esecvec_nodf.push_back(myV.degreesOfFreedom());
+      Esecvec_normchi2.push_back(myV.normalisedChiSquared());
+      Esecvec_eleTag.push_back(EleCount);
+    }
+  }
+
+  EleCount++;
+}/////este es el final de iterador de electrones Para metodo de merging hayq eu borrar*/
+
+  /*while(rSimil && its<150){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
     /////Initialize storage and flags////
     tmpVertices=myVertices;
     myVertices.clear();
