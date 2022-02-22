@@ -148,6 +148,8 @@ private:
   std::vector<float> secvec_jet_pt2;
   std::vector<float> secvec_jet_eta2;
   std::vector<float> secvec_jet_phi2;
+  std::vector<float> secvec_jet_d1;
+  std::vector<float> secvec_jet_d2;
 
   std::vector<float> Esecvec_posx;
   std::vector<float> Esecvec_posy;
@@ -323,6 +325,10 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_jet_eta2")->SetTitle("secvec jet 2 pseudorapidity");
   mtree->Branch("secvec_jet_phi2",&secvec_jet_phi2);
   mtree->GetBranch("secvec_jet_phi2")->SetTitle("secvec jet 2 Asimuthal angle");
+  mtree->Branch("secvec_jet_d1",&secvec_jet_d1);
+  mtree->GetBranch("secvec_jet_d1")->SetTitle("secvec jet 1 impact parameter (mm)");
+  mtree->Branch("secvec_jet_d2",&secvec_jet_d2);
+  mtree->GetBranch("secvec_jet_d2")->SetTitle("secvec jet 2 impact parameter (mm)");
 
   mtree->Branch("Esecvec_posx",&Esecvec_posx);
   mtree->GetBranch("Esecvec_posx")->SetTitle("secvec position x (mm)");
@@ -487,6 +493,8 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_jet_pt2.clear();
   secvec_jet_eta2.clear();
   secvec_jet_phi2.clear();
+  secvec_jet_d1.clear();
+  secvec_jet_d2.clear();
 
   Esecvec_posx.clear();
   Esecvec_posy.clear();
@@ -944,6 +952,8 @@ for(size_t x=0; x<finalVertices.size(); x++){
   secvec_jet_pt2.push_back(-1);
   secvec_jet_eta2.push_back(-1);
   secvec_jet_phi2.push_back(-1);
+  secvec_jet_d1.push_back(-1);
+  secvec_jet_d2.push_back(-1);
 
   Otrk1=myV.originalTracks();
   float px=0,py=0,pz=0;
@@ -1033,6 +1043,9 @@ for(size_t x=0; x<finalVertices.size(); x++){
             secvec_jet_pt2.back()=itjet2->pt();
             secvec_jet_eta2.back()=itjet2->eta();
             secvec_jet_phi2.back()=itjet2->phi();
+            secvec_jet_d1.back()=d1;
+            secvec_jet_d2.back()=d2;
+
           }
         }
       }
