@@ -6,6 +6,7 @@
 // system include files
 #include <memory>
 #include <algorithm>
+#include <bits/stdc++.h>
 
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -130,6 +131,7 @@ private:
   std::vector<float> secvec_poserrorx;
   std::vector<float> secvec_poserrory;
   std::vector<float> secvec_poserrorz;
+
   std::vector<int> secvec_eleTag;
   std::vector<float> secvec_chi2;
   std::vector<float> secvec_nodf;
@@ -137,6 +139,15 @@ private:
   std::vector<float> secvec_px;
   std::vector<float> secvec_py;
   std::vector<float> secvec_pz;
+  std::vector<float> secvec_jet_px;
+  std::vector<float> secvec_jet_py;
+  std::vector<float> secvec_jet_pz;
+  std::vector<float> secvec_jet_pt1;
+  std::vector<float> secvec_jet_eta1;
+  std::vector<float> secvec_jet_phi1;
+  std::vector<float> secvec_jet_pt2;
+  std::vector<float> secvec_jet_eta2;
+  std::vector<float> secvec_jet_phi2;
 
   std::vector<float> Esecvec_posx;
   std::vector<float> Esecvec_posy;
@@ -294,6 +305,24 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_py")->SetTitle("secvec total momentum (GeV)");
   mtree->Branch("secvec_pz",&secvec_pz);
   mtree->GetBranch("secvec_pz")->SetTitle("secvec total momentum (GeV)");
+  mtree->Branch("secvec_jet_px",&secvec_jet_px);
+  mtree->GetBranch("secvec_jet_px")->SetTitle("secvec jet total momentum (GeV)");
+  mtree->Branch("secvec_jet_py",&secvec_jet_py);
+  mtree->GetBranch("secvec_jet_py")->SetTitle("secvec jet total momentum (GeV)");
+  mtree->Branch("secvec_jet_pz",&secvec_jet_pz);
+  mtree->GetBranch("secvec_jet_pz")->SetTitle("secvec jet total momentum (GeV)");
+  mtree->Branch("secvec_jet_pt1",&secvec_jet_pt1);
+  mtree->GetBranch("secvec_jet_pt1")->SetTitle("secvec jet 1 Tranversal momentum (GeV)");
+  mtree->Branch("secvec_jet_eta1",&secvec_jet_eta1);
+  mtree->GetBranch("secvec_jet_eta1")->SetTitle("secvec jet 1 pseudorapidity");
+  mtree->Branch("secvec_jet_phi1",&secvec_jet_phi1);
+  mtree->GetBranch("secvec_jet_phi1")->SetTitle("secvec jet 1 Asimuthal angle");
+  mtree->Branch("secvec_jet_pt2",&secvec_jet_pt2);
+  mtree->GetBranch("secvec_jet_pt2")->SetTitle("secvec jet 2 Tranversal momentum (GeV)");
+  mtree->Branch("secvec_jet_eta2",&secvec_jet_eta2);
+  mtree->GetBranch("secvec_jet_eta2")->SetTitle("secvec jet 2 pseudorapidity");
+  mtree->Branch("secvec_jet_phi2",&secvec_jet_phi2);
+  mtree->GetBranch("secvec_jet_phi2")->SetTitle("secvec jet 2 Asimuthal angle");
 
   mtree->Branch("Esecvec_posx",&Esecvec_posx);
   mtree->GetBranch("Esecvec_posx")->SetTitle("secvec position x (mm)");
@@ -381,6 +410,16 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   math::XYZPoint pv(vertices->begin()->position());
   Handle<double> rhoHandle;
   iEvent.getByLabel(InputTag("fixedGridRhoAll"), rhoHandle);
+  /////jet Handle to jet vector collection////////////////
+  Handle<reco::PFJetCollection> myjets;
+  iEvent.getByLabel("ak5PFJets", myjets);
+  vector<pair<float,size_t>> JetPtTemp;
+  size_t JetCount=0;
+  for (reco::PFJetCollection::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
+    JetPtTemp.push_back(make_pair(itjet->pt(),JetCount));
+    JetCount++;
+  }
+  sort(JetPtTemp.begin(),JetPtTemp.end());
 
   numelectron = 0;
   numgenelec = 0;
@@ -439,6 +478,15 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_px.clear();
   secvec_py.clear();
   secvec_pz.clear();
+  secvec_jet_px.clear();
+  secvec_jet_py.clear();
+  secvec_jet_pz.clear();
+  secvec_jet_pt1.clear();
+  secvec_jet_eta1.clear();
+  secvec_jet_phi1.clear();
+  secvec_jet_pt2.clear();
+  secvec_jet_eta2.clear();
+  secvec_jet_phi2.clear();
 
   Esecvec_posx.clear();
   Esecvec_posy.clear();
@@ -887,6 +935,15 @@ for(size_t x=0; x<finalVertices.size(); x++){
   secvec_nodf.push_back(myV.degreesOfFreedom());
   secvec_normchi2.push_back(myV.normalisedChiSquared());
   secvec_eleTag.push_back(-1);
+  secvec_jet_px.push_back(-1);
+  secvec_jet_py.push_back(-1);
+  secvec_jet_pz.push_back(-1);
+  secvec_jet_pt1.push_back(-1);
+  secvec_jet_eta1.push_back(-1);
+  secvec_jet_phi1.push_back(-1);
+  secvec_jet_pt2.push_back(-1);
+  secvec_jet_eta2.push_back(-1);
+  secvec_jet_phi2.push_back(-1);
 
   Otrk1=myV.originalTracks();
   float px=0,py=0,pz=0;
@@ -921,7 +978,70 @@ for(size_t x=0; x<finalVertices.size(); x++){
 
     }
   }
+
+  if(secvec_eleTag.back()!=-1){
+    JetCount=0;
+    float DM=100;
+    //cout<<"Number of jets: "<<myjets->size()<<endl;
+    for (reco::PFJetCollection::const_iterator itjet1=myjets->begin(); itjet1!=myjets->end(); ++itjet1){
+      for (reco::PFJetCollection::const_iterator itjet2=itjet1+1; itjet2!=myjets->end(); ++itjet2){
+        //cout<<itjet.track(0)->pt()<<endl;
+        auto JetTrk1=itjet1->getTrackRefs();
+        auto JetTrk2=itjet2->getTrackRefs();
+        if(JetTrk1.size()>1 && JetTrk2.size()>1 && itjet1->pt()>20 && itjet2->pt()>20){
+          math::XYZPoint sv= math::XYZPoint(myV.position().x(),myV.position().y(),myV.position().z());
+          reco::Track trackj1= *(JetTrk1.at(0));
+          auto d1 = sqrt(trackj1.dxy(sv)*trackj1.dxy(sv)+trackj1.dz(sv)*trackj1.dz(sv));
+          reco::Track trackj2= *(JetTrk2.at(0));
+          auto d2 = sqrt(trackj2.dxy(sv)*trackj2.dxy(sv)+trackj2.dz(sv)*trackj2.dz(sv));
+          auto Dm=(d1+d2)/2;
+
+          float E=itjet1->energy()+itjet2->energy();
+          float px=itjet1->px()+itjet2->px();
+          float py=itjet1->py()+itjet2->py();
+          float pz=itjet1->pz()+itjet2->pz();
+          float mass=sqrt(E*E-px*px-py*py-pz*pz);
+          int EleCount=0;
+          float EleJetDR=100;
+          for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1){
+            if(EleCount==secvec_eleTag.back()){
+              float DR1=deltaR(itjet1->eta(),itjet1->phi(),itElec1->eta(),itElec1->phi());
+              float DR2=deltaR(itjet2->eta(),itjet2->phi(),itElec1->eta(),itElec1->phi());
+              EleJetDR=min(DR1,DR2);
+            }
+            EleCount++;
+          }
+          EleJetDR=EleJetDR+1;
+          float JetJetDR=deltaR(itjet1->eta(),itjet1->phi(),itjet2->eta(),itjet2->phi());
+          JetJetDR=JetJetDR+1;
+          if(mass>80 && mass<160 && Dm<DM){
+            JetCount++;
+            DM=Dm;
+            //cout<<"Average Impact parmeter: "<<DM<<endl;
+            //cout<<"Electron jet minimun DR: "<<EleJetDR<<endl;
+            //cout<<"Jet Jet DR: "<<JetJetDR<<endl;
+            //cout<<"Jet Impact parameter 1: "<<d1<<" pt 1: "<<itjet1->pt()<<" Vertex Eletag 1: "<<secvec_eleTag.back()<<endl;
+            //cout<<"Jet Impact parameter 2: "<<d2<<" pt 2: "<<itjet2->pt()<<" Vertex Eletag 2: "<<secvec_eleTag.back()<<endl;
+            //cout<<"Mass: "<<mass<<endl;
+
+            secvec_jet_px.back()=itjet1->px()+itjet2->px();
+            secvec_jet_py.back()=itjet1->py()+itjet2->py();
+            secvec_jet_pz.back()=itjet1->pz()+itjet2->pz();
+            secvec_jet_pt1.back()=itjet1->pt();
+            secvec_jet_eta1.back()=itjet1->eta();
+            secvec_jet_phi1.back()=itjet1->phi();
+            secvec_jet_pt2.back()=itjet2->pt();
+            secvec_jet_eta2.back()=itjet2->eta();
+            secvec_jet_phi2.back()=itjet2->phi();
+          }
+        }
+      }
+    }
+    //cout<<"Number of Z candidates: "<<JetCount<<"\n\n";
+  }
+
 }
+
 //cout<<"\n Nsize: "<<secvec_chi2.size()<<" Tag size: "<<secvec_eleTag.size()<<" electron size "<<myelectrons->size()<<"\n\n";
 
 
