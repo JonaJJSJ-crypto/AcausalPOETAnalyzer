@@ -326,8 +326,8 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                     GenDau_vx.push_back(d->vertex().x());
                     GenDau_vy.push_back(d->vertex().y());
                     GenDau_vz.push_back(d->vertex().z());
-			              if(itGenPart->pdgId()==23) cout<<d->pdgId()<<" mom "<<itGenPart->pdgId()<<" "<< d->charge() <<endl;
-			}
+			              //if(itGenPart->pdgId()==23) cout<<d->pdgId()<<" mom "<<itGenPart->pdgId()<<" "<< d->charge() <<endl;
+			     }
 		  //if(itGenPart->pdgId()==556)cout<<"\n\n"<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
 		  //cout<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
 		  //cout<<itGenPart->pdgId()<<' '<<itGenPart->longLived()<<endl;
