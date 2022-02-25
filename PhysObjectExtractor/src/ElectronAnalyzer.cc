@@ -150,6 +150,7 @@ private:
   std::vector<float> secvec_jet_phi2;
   std::vector<float> secvec_jet_d1;
   std::vector<float> secvec_jet_d2;
+  std::vector<float> secvec_jet_eleTag;
 
   std::vector<float> Esecvec_posx;
   std::vector<float> Esecvec_posy;
@@ -329,6 +330,8 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("secvec_jet_d1")->SetTitle("secvec jet 1 impact parameter (mm)");
   mtree->Branch("secvec_jet_d2",&secvec_jet_d2);
   mtree->GetBranch("secvec_jet_d2")->SetTitle("secvec jet 2 impact parameter (mm)");
+  mtree->Branch("secvec_jet_eleTag",&secvec_jet_eleTag);
+  mtree->GetBranch("secvec_jet_eleTag")->SetTitle("secvec jet electron Tag (mm)");
 
   mtree->Branch("Esecvec_posx",&Esecvec_posx);
   mtree->GetBranch("Esecvec_posx")->SetTitle("secvec position x (mm)");
@@ -495,6 +498,7 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   secvec_jet_phi2.clear();
   secvec_jet_d1.clear();
   secvec_jet_d2.clear();
+  secvec_jet_eleTag.clear();
 
   Esecvec_posx.clear();
   Esecvec_posy.clear();
@@ -943,7 +947,7 @@ for(size_t x=0; x<finalVertices.size(); x++){
   secvec_nodf.push_back(myV.degreesOfFreedom());
   secvec_normchi2.push_back(myV.normalisedChiSquared());
   secvec_eleTag.push_back(-1);
-  secvec_jet_px.push_back(-1);
+  /*secvec_jet_px.push_back(-1);
   secvec_jet_py.push_back(-1);
   secvec_jet_pz.push_back(-1);
   secvec_jet_pt1.push_back(-1);
@@ -953,7 +957,7 @@ for(size_t x=0; x<finalVertices.size(); x++){
   secvec_jet_eta2.push_back(-1);
   secvec_jet_phi2.push_back(-1);
   secvec_jet_d1.push_back(-1);
-  secvec_jet_d2.push_back(-1);
+  secvec_jet_d2.push_back(-1);*/
 
   Otrk1=myV.originalTracks();
   float px=0,py=0,pz=0;
@@ -981,6 +985,7 @@ for(size_t x=0; x<finalVertices.size(); x++){
             if(deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),itTrack1->eta(),itTrack1->phi())==0
               && Otrk1.at(z).track().pt()==itTrack1->pt()){
                 secvec_eleTag.back()=y;
+                //cout<<" Electron track pt: "<<itTrack1->pt()<<" pz: "<<itTrack1->pz()<< " eta: "<<itTrack1->eta()<<endl;
               }
           }
         }
@@ -992,6 +997,7 @@ for(size_t x=0; x<finalVertices.size(); x++){
   if(secvec_eleTag.back()!=-1){
     JetCount=0;
     float DM=100;
+    //size_t Trackcount=0;
     //cout<<"Number of jets: "<<myjets->size()<<endl;
     for (reco::PFJetCollection::const_iterator itjet1=myjets->begin(); itjet1!=myjets->end(); ++itjet1){
       for (reco::PFJetCollection::const_iterator itjet2=itjet1+1; itjet2!=myjets->end(); ++itjet2){
@@ -1034,30 +1040,170 @@ for(size_t x=0; x<finalVertices.size(); x++){
             //cout<<"Jet Impact parameter 2: "<<d2<<" pt 2: "<<itjet2->pt()<<" Vertex Eletag 2: "<<secvec_eleTag.back()<<endl;
             //cout<<"Mass: "<<mass<<endl;
 
-            secvec_jet_px.back()=itjet1->px()+itjet2->px();
-            secvec_jet_py.back()=itjet1->py()+itjet2->py();
-            secvec_jet_pz.back()=itjet1->pz()+itjet2->pz();
-            secvec_jet_pt1.back()=itjet1->pt();
-            secvec_jet_eta1.back()=itjet1->eta();
-            secvec_jet_phi1.back()=itjet1->phi();
-            secvec_jet_pt2.back()=itjet2->pt();
-            secvec_jet_eta2.back()=itjet2->eta();
-            secvec_jet_phi2.back()=itjet2->phi();
-            secvec_jet_d1.back()=d1;
-            secvec_jet_d2.back()=d2;
+            secvec_jet_px.push_back(itjet1->px()+itjet2->px());
+            secvec_jet_py.push_back(itjet1->py()+itjet2->py());
+            secvec_jet_pz.push_back(itjet1->pz()+itjet2->pz());
+            secvec_jet_pt1.push_back(itjet1->pt());
+            secvec_jet_eta1.push_back(itjet1->eta());
+            secvec_jet_phi1.push_back(itjet1->phi());
+            secvec_jet_pt2.push_back(itjet2->pt());
+            secvec_jet_eta2.push_back(itjet2->eta());
+            secvec_jet_phi2.push_back(itjet2->phi());
+            secvec_jet_d1.push_back(d1);
+            secvec_jet_d2.push_back(d2);
+            secvec_jet_eleTag.push_back(secvec_eleTag.back());
 
           }
+
         }
       }
+      //size_t JetJetCount=0;
+      /*auto JetTrk1=itjet1->getTrackRefs();
+      if(JetTrk1.size()>1 && itjet1->pt()>20){
+        reco::Track trackj1= *(JetTrk1.at(0));
+        for(size_t z=0; z<Otrk1.size(); z++){
+          if(deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),trackj1.eta(),trackj1.phi())==0
+            && Otrk1.at(z).track().pt()==trackj1.pt()){
+              Trackcount++;
+              //JetJetCount++;
+              //cout<<" Jet Energetic constituent track pt: "<<trackj1.pt()<<" pz: "<<trackj1.pz()<<" eta: "<<trackj1.eta()<<endl;
+            }
+
+        }
+      }*/
+      //cout<<"Number of jet track per jet: "<<JetJetCount<<endl;
     }
-    //cout<<"Number of Z candidates: "<<JetCount<<"\n\n";
+    for(size_t z=0; z<Otrk1.size(); z++){
+      //cout<<" Secvec track pt: "<<Otrk1.at(z).track().pt()<<" pz: "<<Otrk1.at(z).track().pz()<<" eta: "<<Otrk1.at(z).track().eta()<<endl;
+    }
+    //cout<<"Number of jet track in Secvec: "<<Trackcount<<" Number of tracks secvec: "<<Otrk1.size()<<" Vertex Eletag 1: "<<secvec_eleTag.back()<<"\n\n";
+
   }
 
 }
 
 //cout<<"\n Nsize: "<<secvec_chi2.size()<<" Tag size: "<<secvec_eleTag.size()<<" electron size "<<myelectrons->size()<<"\n\n";
 
+//////////////////////////Making Secondary vertices with electrons and jets///////////////////////////////
+//bool EletrackMatch;
+/*int EleCount=0;
+for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1){
+  //EletrackMatch=false;
+  TransientTrack t_trkele;
+  vector<TransientTrack> trackVec;
+  bool ElecTrackPush = false, Jet1TrackPush = false, Jet2TrackPush = false;
 
+  auto trackele=itElec1->gsfTrack();
+  if( trackele->pt()>1){
+    ElecTrackPush=true;
+    t_trkele=(* theB).build(trackele);
+  }
+  i=0;
+  for(TrackCollection::const_iterator itTrack1 = tracks->begin();
+         itTrack1 != tracks->end();
+         ++itTrack1)
+  {
+    if( itTrack1->pt()>1){
+      if(i==identyTrack[EleCount]) EletrackMatch=true;
+      if( EletrackMatch && itTrack1->quality(reco::Track::highPurity) ){
+        //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
+        t_trkele = (* theB).build(* itTrack1);
+        ElecTrackPush=true;
+      }
+        i++;
+    }//final if pt track HQ track
+  }//fin for Track1
+
+  for (reco::PFJetCollection::const_iterator itjet1=myjets->begin(); itjet1!=myjets->end(); ++itjet1){
+    for (reco::PFJetCollection::const_iterator itjet2=itjet1+1; itjet2!=myjets->end(); ++itjet2){
+      Jet1TrackPush = false;
+      Jet2TrackPush = false;
+      //cout<<itjet.track(0)->pt()<<endl;
+      auto JetTrk1=itjet1->getTrackRefs();
+      auto JetTrk2=itjet2->getTrackRefs();
+      if(JetTrk1.size()>1 && JetTrk2.size()>1 && itjet1->pt()>20 && itjet2->pt()>20){
+
+        float E=itjet1->energy()+itjet2->energy();
+        float px=itjet1->px()+itjet2->px();
+        float py=itjet1->py()+itjet2->py();
+        float pz=itjet1->pz()+itjet2->pz();
+        float mass=sqrt(E*E-px*px-py*py-pz*pz);
+
+        //float EleJetDR=100;
+        //float DR1=deltaR(itjet1->eta(),itjet1->phi(),itElec1->eta(),itElec1->phi());
+        //float DR2=deltaR(itjet2->eta(),itjet2->phi(),itElec1->eta(),itElec1->phi());
+        //EleJetDR=min(DR1,DR2);
+        //EleJetDR=EleJetDR+1;
+        //float JetJetDR=deltaR(itjet1->eta(),itjet1->phi(),itjet2->eta(),itjet2->phi());
+        //JetJetDR=JetJetDR+1;
+        if(mass>80 && mass<160){
+          //cout<<"   Jet 1 pt: "<<itjet1->pt()<<" pz: "<<itjet1->pz()<<" eta: "<<itjet1->eta()<<" charge: "<<itjet1->charge()<<endl;
+          //cout<<"   Jet 2 pt: "<<itjet2->pt()<<" pz: "<<itjet2->pz()<<" eta: "<<itjet2->eta()<<" charge: "<<itjet2->charge()<<"\n\n";
+          trackVec.clear();
+          trackVec.push_back(t_trkele);
+          for(size_t j1=0; j1<1; j1++){
+            auto trackjet1 = *(JetTrk1.at(j1));
+            if(trackjet1.quality(reco::Track::highPurity) && trackjet1.pt()>1){
+              auto t_trkjet1 = (* theB).build(trackjet1);
+              trackVec.push_back(t_trkjet1);
+              Jet1TrackPush=true;
+            }
+          }
+          auto trackjet1 = *(JetTrk1.at(0));
+          if(trackjet1.quality(reco::Track::highPurity)){
+            auto t_trkjet1 = (* theB).build(trackjet1);
+            trackVec.push_back(t_trkjet1);
+            Jet1TrackPush=true;
+          }
+          for(size_t j2=0; j2<1; j2++){
+            auto trackjet2 = *(JetTrk2.at(j2));
+            if(trackjet2.quality(reco::Track::highPurity) && trackjet2.pt()>1){
+              auto t_trkjet2 = (* theB).build(trackjet2);
+              trackVec.push_back(t_trkjet2);
+              Jet2TrackPush=true;
+            }
+          }
+          auto trackjet2 = *(JetTrk2.at(0));
+          if(trackjet2.quality(reco::Track::highPurity)){
+            auto t_trkjet2 = (* theB).build(trackjet2);
+            trackVec.push_back(t_trkjet2);
+            Jet2TrackPush=true;
+          }
+          JetCount++;
+          if(ElecTrackPush && Jet1TrackPush && Jet2TrackPush) {
+            TransientVertex myVertex = fitter.vertex(trackVec);
+            if(myVertex.isValid()){
+               myVertices.push_back(myVertex);
+            }
+          }
+        }
+      }
+    }
+    //cout<<"Number of jet track per jet: "<<JetJetCount<<endl;
+  }
+  //cout<<"\n\nNumber of secondary vertices: "<<myVertices.size()<<" Electron pt: "<<itElec1->pt()<<" N: "<<EleCount<<endl;
+  for(size_t x=0; x<myVertices.size(); x++){
+    TransientVertex myV=myVertices.at(x);
+    //cout<<"Vertex normChi2: "<<myV.normalisedChiSquared()<<" Number of tracks: "<<myV.originalTracks().size()<<endl;
+    if(myV.normalisedChiSquared()<5){
+      numEsecvec++;
+      //cout<<"Number of valid Secvec: "<<numEsecvec<<" N: "<<EleCount<<endl;
+      Esecvec_posx.push_back(myV.position().x());
+      Esecvec_posy.push_back(myV.position().y());
+      Esecvec_posz.push_back(myV.position().z());
+      Esecvec_poserrorx.push_back(myV.positionError().cxx());
+      Esecvec_poserrory.push_back(myV.positionError().cyy());
+      Esecvec_poserrorz.push_back(myV.positionError().czz());
+      Esecvec_chi2.push_back(myV.totalChiSquared());
+      Esecvec_nodf.push_back(myV.degreesOfFreedom());
+      Esecvec_normchi2.push_back(myV.normalisedChiSquared());
+      Esecvec_eleTag.push_back(EleCount);
+    }
+  }
+
+  EleCount++;
+  myVertices.clear();
+}/////este es el final de iterador de electrones Para metodo de merging hay qeu borrar*/
 
 //////////////////////////////////////////Making secondary vertices with electron tracks///////////////////////////////
 ///////////////plan iterate all electron track with hq tracks to form vertices and then merge them all
@@ -1146,7 +1292,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
   }
 
   EleCount++;
-}/////este es el final de iterador de electrones Para metodo de merging hayq eu borrar*/
+}/////este es el final de iterador de electrones Para metodo de merging hay qeu borrar*/
 
   /*while(rSimil && its<150){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
     /////Initialize storage and flags////
