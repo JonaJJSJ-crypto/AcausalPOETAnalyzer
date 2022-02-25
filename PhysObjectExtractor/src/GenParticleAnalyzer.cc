@@ -62,6 +62,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       int numGenPart;
       std::vector<int> GenPart_status;
       std::vector<float> GenPart_pt;
+      std::vector<float> GenPart_ch;
       std::vector<float> GenPart_eta;
       std::vector<float> GenPart_mass;
       std::vector<int> GenPart_pdgId;
@@ -81,6 +82,7 @@ class GenParticleAnalyzer : public edm::EDAnalyzer {
       int numGenDau;
       std::vector<int> GenDau_status;
       std::vector<float> GenDau_pt;
+      std::vector<float> GenDau_ch;
       std::vector<float> GenDau_eta;
       std::vector<float> GenDau_mass;
       std::vector<int> GenDau_pdgId;
@@ -133,6 +135,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("numGenPart")->SetTitle("number of generator particles");
     mtree->Branch("GenPart_pt",&GenPart_pt);
     mtree->GetBranch("GenPart_pt")->SetTitle("generator particle transverse momentum");
+    mtree->Branch("GenPart_ch",&GenPart_ch);
+    mtree->GetBranch("GenPart_ch")->SetTitle("generator particle charge");
     mtree->Branch("GenPart_eta",&GenPart_eta);
     mtree->GetBranch("GenPart_eta")->SetTitle("generator particle pseudorapidity");
     mtree->Branch("GenPart_mass",&GenPart_mass);
@@ -166,6 +170,8 @@ particle(iConfig.getParameter<std::vector<std::string> >("input_particle"))
     mtree->GetBranch("numGenDau")->SetTitle("number of generator particles");
     mtree->Branch("GenDau_pt",&GenDau_pt);
     mtree->GetBranch("GenDau_pt")->SetTitle("generator particle transverse momentum");
+    mtree->Branch("GenDau_ch",&GenDau_ch);
+    mtree->GetBranch("GenDau_ch")->SetTitle("generator particle charge");
     mtree->Branch("GenDau_eta",&GenDau_eta);
     mtree->GetBranch("GenDau_eta")->SetTitle("generator particle pseudorapidity");
     mtree->Branch("GenDau_mass",&GenDau_mass);
@@ -217,6 +223,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    numGenPart=0;
    GenPart_pt.clear();
+   GenPart_ch.clear();
    GenPart_eta.clear();
    GenPart_mass.clear();
    GenPart_pdgId.clear();
@@ -234,6 +241,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 
    numGenDau=0;
    GenDau_pt.clear();
+   GenDau_ch.clear();
    GenDau_eta.clear();
    GenDau_mass.clear();
    GenDau_pdgId.clear();
@@ -279,6 +287,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                 {
 		  numGenPart++;//arreglado conteo de particulas generadas
                   GenPart_pt.push_back(itGenPart->pt());
+                  GenPart_ch.push_back(itGenPart->charge());
                   GenPart_eta.push_back(itGenPart->eta());
                   GenPart_mass.push_back(itGenPart->mass());
                   GenPart_pdgId.push_back(itGenPart->pdgId());
@@ -288,21 +297,22 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                   GenPart_py.push_back(itGenPart->py());
                   GenPart_pz.push_back(itGenPart->pz());
                   //GenPart_e.push_back(itGenPart->e());
-		  GenPart_longlived.push_back(itGenPart->longLived());
+		              GenPart_longlived.push_back(itGenPart->longLived());
                   GenPart_vx.push_back(itGenPart->vertex().x());
                   GenPart_vy.push_back(itGenPart->vertex().y());
                   GenPart_vz.push_back(itGenPart->vertex().z());
 
 
-		  if(abs(itGenPart->pdgId())!=556)GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
-		  else GenPart_mompdgId.push_back(23);
+		  if(abs(itGenPart->pdgId())!=556) GenPart_mompdgId.push_back(itGenPart->mother()->pdgId());
+		  else GenPart_mompdgId.push_back(itGenPart->pdgId());
 		  //Daugther store
 		  int n = itGenPart->numberOfDaughters();
 		  numGenDau=n;
       		  for(int j = 0; j < n; ++ j) {
        			const reco::Candidate * d = itGenPart->daughter( j );
-			GenDau_pt.push_back(d->pt());
-                	GenDau_eta.push_back(d->eta());
+			              GenDau_pt.push_back(d->pt());
+                    GenDau_ch.push_back(d->charge());
+                	  GenDau_eta.push_back(d->eta());
                   	GenDau_mass.push_back(d->mass());
                   	GenDau_pdgId.push_back(d->pdgId());
                   	GenDau_phi.push_back(d->phi());
@@ -316,7 +326,7 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
                     GenDau_vx.push_back(d->vertex().x());
                     GenDau_vy.push_back(d->vertex().y());
                     GenDau_vz.push_back(d->vertex().z());
-			//cout<<d->pdgId()<<' '<<d->longLived()<<endl;
+			              if(itGenPart->pdgId()==23) cout<<d->pdgId()<<" mom "<<itGenPart->pdgId()<<" "<< d->charge() <<endl;
 			}
 		  //if(itGenPart->pdgId()==556)cout<<"\n\n"<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
 		  //cout<<itGenPart->vertex()<<' '<<itGenPart->p4()<<endl;
