@@ -162,6 +162,18 @@ private:
   std::vector<float> Esecvec_chi2;
   std::vector<float> Esecvec_nodf;
   std::vector<float> Esecvec_normchi2;
+  std::vector<float> Esecvec_px;
+  std::vector<float> Esecvec_py;
+  std::vector<float> Esecvec_pz;
+  std::vector<float> Esecvec_jet_pt1;
+  std::vector<float> Esecvec_jet_eta1;
+  std::vector<float> Esecvec_jet_phi1;
+  std::vector<float> Esecvec_jet_pt2;
+  std::vector<float> Esecvec_jet_eta2;
+  std::vector<float> Esecvec_jet_phi2;
+  std::vector<float> Esecvec_jet_d1;
+  std::vector<float> Esecvec_jet_d2;
+
   //std::vector<int> electron_Bsecvec;//best match for electron sec vec
   std::vector<int> electron_BdR;//best match delta R for electron sec vec
   std::vector<int> electron_secN;//# of printed electrons in Secvert
@@ -353,6 +365,29 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("Esecvec_normchi2")->SetTitle("Vertex normalized chi squared");
   mtree->Branch("Esecvec_nodf",&Esecvec_nodf);
   mtree->GetBranch("Esecvec_nodf")->SetTitle("Track number of degree of freedom");
+  mtree->Branch("Esecvec_px",&Esecvec_px);
+  mtree->GetBranch("Esecvec_px")->SetTitle("Esecvec total momentum (GeV)");
+  mtree->Branch("Esecvec_py",&Esecvec_py);
+  mtree->GetBranch("Esecvec_py")->SetTitle("Esecvec total momentum (GeV)");
+  mtree->Branch("Esecvec_pz",&Esecvec_pz);
+  mtree->GetBranch("Esecvec_pz")->SetTitle("Esecvec total momentum (GeV)");
+  mtree->Branch("Esecvec_jet_pt1",&Esecvec_jet_pt1);
+  mtree->GetBranch("Esecvec_jet_pt1")->SetTitle("Esecvec jet 1 Tranversal momentum (GeV)");
+  mtree->Branch("Esecvec_jet_eta1",&Esecvec_jet_eta1);
+  mtree->GetBranch("Esecvec_jet_eta1")->SetTitle("Esecvec jet 1 pseudorapidity");
+  mtree->Branch("Esecvec_jet_phi1",&Esecvec_jet_phi1);
+  mtree->GetBranch("Esecvec_jet_phi1")->SetTitle("Esecvec jet 1 Asimuthal angle");
+  mtree->Branch("Esecvec_jet_pt2",&Esecvec_jet_pt2);
+  mtree->GetBranch("Esecvec_jet_pt2")->SetTitle("Esecvec jet 2 Tranversal momentum (GeV)");
+  mtree->Branch("Esecvec_jet_eta2",&Esecvec_jet_eta2);
+  mtree->GetBranch("Esecvec_jet_eta2")->SetTitle("Esecvec jet 2 pseudorapidity");
+  mtree->Branch("Esecvec_jet_phi2",&Esecvec_jet_phi2);
+  mtree->GetBranch("Esecvec_jet_phi2")->SetTitle("Esecvec jet 2 Asimuthal angle");
+  mtree->Branch("Esecvec_jet_d1",&Esecvec_jet_d1);
+  mtree->GetBranch("Esecvec_jet_d1")->SetTitle("Esecvec jet 1 impact parameter (mm)");
+  mtree->Branch("Esecvec_jet_d2",&Esecvec_jet_d2);
+  mtree->GetBranch("Esecvec_jet_d2")->SetTitle("Esecvec jet 2 impact parameter (mm)");
+
   /*mtree->Branch("electron_Bsecvec",&electron_Bsecvec);
   mtree->GetBranch("electron_Bsecvec")->SetTitle("best match electrons for secondary vertex");*/
   mtree->Branch("electron_BdR",&electron_BdR);
@@ -423,6 +458,16 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   Handle<reco::PFJetCollection> myjets;
   iEvent.getByLabel("ak5PFJets", myjets);
   vector<pair<float,size_t>> JetPtTemp;
+
+  Handle<TrackCollection> tracks;
+  Handle<reco::TrackCollection> tks;
+  ESHandle<TransientTrackBuilder> theB;
+
+  iEvent.getByLabel("generalTracks", tks);
+  iEvent.getByLabel("generalTracks", tracks);
+  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
+  KalmanVertexFitter fitter;
+
   size_t JetCount=0;
   for (reco::PFJetCollection::const_iterator itjet=myjets->begin(); itjet!=myjets->end(); ++itjet){
     JetPtTemp.push_back(make_pair(itjet->pt(),JetCount));
@@ -510,6 +555,18 @@ ElectronAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetu
   Esecvec_chi2.clear();
   Esecvec_nodf.clear();
   Esecvec_normchi2.clear();
+  Esecvec_px.clear();
+  Esecvec_py.clear();
+  Esecvec_pz.clear();
+  Esecvec_jet_pt1.clear();
+  Esecvec_jet_eta1.clear();
+  Esecvec_jet_phi1.clear();
+  Esecvec_jet_pt2.clear();
+  Esecvec_jet_eta2.clear();
+  Esecvec_jet_phi2.clear();
+  Esecvec_jet_d1.clear();
+  Esecvec_jet_d2.clear();
+
   //electron_Bsecvec.clear();
   electron_BdR.clear();
   electron_secN.clear();
@@ -655,32 +712,6 @@ if(!isData){
 
 /////////////////////////////////////////End best Gen match//////////////////////////////////
 
-///////////////////////////////////////Secondary Vertices//////////////////////////////////////////////
-
-   Handle<TrackCollection> tracks;
-   Handle<reco::TrackCollection> tks;
-   ESHandle<TransientTrackBuilder> theB;
-
-   iEvent.getByLabel("generalTracks", tks);
-   iEvent.getByLabel("generalTracks", tracks);
-/////////////////////TransientTrackBuilding////////////////
-
-      iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder",theB);
-      vector<TransientTrack> t_tks = (*theB).build(tks);
-//////////////////////secondary reco////////////////
-   //Handle<PFJetCollection> myjets;//jets collection if neede
-   //iEvent.getByLabel("ak5PFJets", myjets);
-//displacement variables
-  /*float dispx;
-  float dispy;
-  float dispz;
-  float disp;
-
-  float dispR;
-  float xerr;
-  float yerr;
-  float zerr;*/
-
 //iterative identification between track and electron using Delta R, only using tracks pt>20 and electrons from gsf
 float saveDR;
 int identyTrack[myelectrons->size()];
@@ -703,7 +734,16 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
       	  identyTrack[k]=j;//track idex thta best fit Electrons
         }
         j++;
+        //cout<<"Electron pt: "<<itElec1->pt()<<" Track pt: "<<itTrack1->pt()<<endl;
      }
+  }
+  j=0;
+  for(TrackCollection::const_iterator itTrack1 = tracks->begin(); itTrack1 != tracks->end(); ++itTrack1)
+  {
+    if(itTrack1->pt()>1){
+      if(identyTrack[k]==j) //cout<<"Electron pt: "<<itElec1->pt()<<" Track pt: "<<itTrack1->pt()<<" GsfTrack: "<<itElec1->gsfTrack()->pt()<<endl;
+      j++;
+    }
   }
  //}
 
@@ -712,7 +752,7 @@ for (GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1
 
  if(identyTrack[k]!=-1){
   //cout<<"   "<<identyTrack[k]<<' '<<itElec1->pt()<<' ';
-  int j=0;
+  j=0;
   for(TrackCollection::const_iterator itTrack1 = tracks->begin(); itTrack1 != tracks->end(); ++itTrack1)
   {
      if(itTrack1->pt()>1){
@@ -755,14 +795,11 @@ for(size_t x =0; x<myelectrons->size(); x++){trk_identity.push_back(identyTrack[
 ////////////////////////////////////////////////////////////////////
 
 
-
+////////////////////////Secondary vertex reconstruction. Mixing between all the Tracks///////////////////////
 //fin identifier
-
-vector<float> savedisp (myelectrons->size());
 vector<TransientVertex> myVertices;
-KalmanVertexFitter fitter;
 //float savedisp[myelectrons.size()];
-int  i=0;
+/*int  i=0;
 for(TrackCollection::const_iterator itTrack1 = tracks->begin();
        itTrack1 != tracks->end();
        ++itTrack1)
@@ -782,9 +819,9 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
              if(t_tks.size()>2 && itTrack1->pt()!=itTrack2->pt()){
           	  //if(itTrack1->pt()!=itTrack3->pt() && itTrack2->pt()!=itTrack3->pt()){
 
-          	   /*cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
-          	   cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
-          	   cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;*/
+          	   //cout<<"\npt1: "<<itTrack1->pt()<<" pt2: "<<itTrack2->pt()<<" pt3: "<<itTrack3->pt();
+          	   //cout<<" deltaR1-2: "<<deltaR(itTrack1->phi(),itTrack1->eta(),itTrack2->phi(),itTrack2->eta());
+          	   //cout<<" deltaR1-3: "<<deltaR(itTrack3->phi(),itTrack3->eta(),itTrack1->phi(),itTrack1->eta())<<endl;
 
                      //auto trk1 = itElec1->gsfTrack();
                      TransientTrack t_trk1 = (* theB).build(* itTrack1);
@@ -811,12 +848,12 @@ for(TrackCollection::const_iterator itTrack1 = tracks->begin();
       i++;
   }//final if pt track HQ track
 }//fin for Track1
-electron_secN.push_back(i);
+electron_secN.push_back(i);*/
 
 //cout<<"\n\n\n Number of vertices before merging: "<<myVertices.size()<<"\n\n\n";
 
 ///////////////////////Merging vertices////////////////////////////////
-vector<TransientVertex> tmpVertices;//temporal vertices storage use for iterations
+/*vector<TransientVertex> tmpVertices;//temporal vertices storage use for iterations
 vector<TransientVertex> finalVertices;//Vertices Fully merged and filtered
 vector<TransientTrack> Otrk1;//Original tracks stoage use for iterations
 vector<TransientTrack> Otrk2;//Original tracks stoage use for iterations
@@ -868,18 +905,18 @@ while(rSimil && its<150){// lasso while stops whenever there are not vertices le
           for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
             for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
               /////check if two vertices are close enough
-              /*float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
-                                +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
-                                +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
-              float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
-                                +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
-                                +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
-              Sigma1=min(Sigma1,Sigma2);
-              float dx,dy,dz, dist;
-              dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
-              dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
-              dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
-              dist= sqrt(dx*dx+dy*dy+dz*dz);*/
+              //float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
+              //                  +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
+              //                  +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
+              //float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
+              //                  +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
+              //                  +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
+              //Sigma1=min(Sigma1,Sigma2);
+              //float dx,dy,dz, dist;
+              //dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
+              //dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
+              //dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
+              //dist= sqrt(dx*dx+dy*dy+dz*dz);
 
               if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
                  && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt()){// && dist<4*Sigma1){ //check whenever a track is shared in both sets
@@ -910,9 +947,9 @@ while(rSimil && its<150){// lasso while stops whenever there are not vertices le
           //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
           //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
           if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size())repeatcount++;// if two or more vertex are identical count
-          /*if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
-            break;
-          }*/
+          //if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
+          //  break;
+          //}
           if(Otrktmp.size()>2 && repeatcount<2){//check if temporal track could be fitted check if the identical vertex where already merged
             //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
             //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
@@ -930,10 +967,10 @@ while(rSimil && its<150){// lasso while stops whenever there are not vertices le
   }
   //cout<<" Valid vertex "<< vertexcount<<endl;
   //cout<<"\n\n\n Number of vertices after merging: "<<myVertices.size()<<" Final vertices: "<<finalVertices.size()<<"\n\n\n";
-}
+}*/
 //cout<<"Iterations: "<< its <<" Final vertices: "<<finalVertices.size()<<endl;
 /////////////Mergin fin////////////////////////
-for(size_t x=0; x<finalVertices.size(); x++){
+/*for(size_t x=0; x<finalVertices.size(); x++){
   TransientVertex myV=finalVertices.at(x);
   Otrk1.clear();
   numsecvec++;
@@ -947,17 +984,17 @@ for(size_t x=0; x<finalVertices.size(); x++){
   secvec_nodf.push_back(myV.degreesOfFreedom());
   secvec_normchi2.push_back(myV.normalisedChiSquared());
   secvec_eleTag.push_back(-1);
-  /*secvec_jet_px.push_back(-1);
-  secvec_jet_py.push_back(-1);
-  secvec_jet_pz.push_back(-1);
-  secvec_jet_pt1.push_back(-1);
-  secvec_jet_eta1.push_back(-1);
-  secvec_jet_phi1.push_back(-1);
-  secvec_jet_pt2.push_back(-1);
-  secvec_jet_eta2.push_back(-1);
-  secvec_jet_phi2.push_back(-1);
-  secvec_jet_d1.push_back(-1);
-  secvec_jet_d2.push_back(-1);*/
+  //secvec_jet_px.push_back(-1);
+  //secvec_jet_py.push_back(-1);
+  //secvec_jet_pz.push_back(-1);
+  //secvec_jet_pt1.push_back(-1);
+  //secvec_jet_eta1.push_back(-1);
+  //secvec_jet_phi1.push_back(-1);
+  //secvec_jet_pt2.push_back(-1);
+  //secvec_jet_eta2.push_back(-1);
+  //secvec_jet_phi2.push_back(-1);
+  //secvec_jet_d1.push_back(-1);
+  //secvec_jet_d2.push_back(-1);
 
   Otrk1=myV.originalTracks();
   float px=0,py=0,pz=0;
@@ -1058,19 +1095,19 @@ for(size_t x=0; x<finalVertices.size(); x++){
         }
       }
       //size_t JetJetCount=0;
-      /*auto JetTrk1=itjet1->getTrackRefs();
-      if(JetTrk1.size()>1 && itjet1->pt()>20){
-        reco::Track trackj1= *(JetTrk1.at(0));
-        for(size_t z=0; z<Otrk1.size(); z++){
-          if(deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),trackj1.eta(),trackj1.phi())==0
-            && Otrk1.at(z).track().pt()==trackj1.pt()){
-              Trackcount++;
+      //auto JetTrk1=itjet1->getTrackRefs();
+      //if(JetTrk1.size()>1 && itjet1->pt()>20){
+      //  reco::Track trackj1= *(JetTrk1.at(0));
+      //  for(size_t z=0; z<Otrk1.size(); z++){
+      //    if(deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),trackj1.eta(),trackj1.phi())==0
+      //      && Otrk1.at(z).track().pt()==trackj1.pt()){
+      //        Trackcount++;
               //JetJetCount++;
               //cout<<" Jet Energetic constituent track pt: "<<trackj1.pt()<<" pz: "<<trackj1.pz()<<" eta: "<<trackj1.eta()<<endl;
-            }
+      //      }
 
-        }
-      }*/
+      //  }
+      //}
       //cout<<"Number of jet track per jet: "<<JetJetCount<<endl;
     }
     for(size_t z=0; z<Otrk1.size(); z++){
@@ -1080,130 +1117,261 @@ for(size_t x=0; x<finalVertices.size(); x++){
 
   }
 
-}
+}*/
 
 //cout<<"\n Nsize: "<<secvec_chi2.size()<<" Tag size: "<<secvec_eleTag.size()<<" electron size "<<myelectrons->size()<<"\n\n";
 
 //////////////////////////Making Secondary vertices with electrons and jets///////////////////////////////
 //bool EletrackMatch;
-/*int EleCount=0;
+int EleCount=0;
+//cout<<"Electrons size: "<<myelectrons->size()<<endl;
 for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!=myelectrons->end(); ++itElec1){
   //EletrackMatch=false;
   TransientTrack t_trkele;
-  vector<TransientTrack> trackVec;
-  bool ElecTrackPush = false, Jet1TrackPush = false, Jet2TrackPush = false;
+  vector<TransientTrack> trackVec1;
+  vector<TransientTrack> trackVec2;
+  //bool ElecTrackPush = false, Jet1TrackPush = false, Jet2TrackPush = false;
 
   auto trackele=itElec1->gsfTrack();
   if( trackele->pt()>1){
-    ElecTrackPush=true;
+    //ElecTrackPush=true;
     t_trkele=(* theB).build(trackele);
   }
-  i=0;
-  for(TrackCollection::const_iterator itTrack1 = tracks->begin();
-         itTrack1 != tracks->end();
-         ++itTrack1)
-  {
-    if( itTrack1->pt()>1){
-      if(i==identyTrack[EleCount]) EletrackMatch=true;
-      if( EletrackMatch && itTrack1->quality(reco::Track::highPurity) ){
-        //cout<<itTrack1->quality(reco::Track::highPurity)<<endl;
-        t_trkele = (* theB).build(* itTrack1);
-        ElecTrackPush=true;
-      }
-        i++;
-    }//final if pt track HQ track
-  }//fin for Track1
+  //size_t i=0;
 
-  for (reco::PFJetCollection::const_iterator itjet1=myjets->begin(); itjet1!=myjets->end(); ++itjet1){
-    for (reco::PFJetCollection::const_iterator itjet2=itjet1+1; itjet2!=myjets->end(); ++itjet2){
-      Jet1TrackPush = false;
-      Jet2TrackPush = false;
-      //cout<<itjet.track(0)->pt()<<endl;
-      auto JetTrk1=itjet1->getTrackRefs();
-      auto JetTrk2=itjet2->getTrackRefs();
-      if(JetTrk1.size()>1 && JetTrk2.size()>1 && itjet1->pt()>20 && itjet2->pt()>20){
+  if(myjets->size()>=2){
+    for (reco::PFJetCollection::const_iterator itjet1=myjets->begin(); itjet1!=myjets->end(); ++itjet1){
+      for (reco::PFJetCollection::const_iterator itjet2=itjet1+1; itjet2!=myjets->end(); ++itjet2){
+        //Jet1TrackPush = false;
+        //Jet2TrackPush = false;
+        //cout<<itjet.track(0)->pt()<<endl;
+        auto JetTrk1=itjet1->getTrackRefs();
+        auto JetTrk2=itjet2->getTrackRefs();
+        if(JetTrk1.size()>1 && JetTrk2.size()>1 && itjet1->pt()>20 && itjet2->pt()>20){
 
-        float E=itjet1->energy()+itjet2->energy();
-        float px=itjet1->px()+itjet2->px();
-        float py=itjet1->py()+itjet2->py();
-        float pz=itjet1->pz()+itjet2->pz();
-        float mass=sqrt(E*E-px*px-py*py-pz*pz);
+          float E=itjet1->energy()+itjet2->energy();
+          float px=itjet1->px()+itjet2->px();
+          float py=itjet1->py()+itjet2->py();
+          float pz=itjet1->pz()+itjet2->pz();
+          float mass=sqrt(E*E-px*px-py*py-pz*pz);
 
-        //float EleJetDR=100;
-        //float DR1=deltaR(itjet1->eta(),itjet1->phi(),itElec1->eta(),itElec1->phi());
-        //float DR2=deltaR(itjet2->eta(),itjet2->phi(),itElec1->eta(),itElec1->phi());
-        //EleJetDR=min(DR1,DR2);
-        //EleJetDR=EleJetDR+1;
-        //float JetJetDR=deltaR(itjet1->eta(),itjet1->phi(),itjet2->eta(),itjet2->phi());
-        //JetJetDR=JetJetDR+1;
-        if(mass>80 && mass<160){
-          //cout<<"   Jet 1 pt: "<<itjet1->pt()<<" pz: "<<itjet1->pz()<<" eta: "<<itjet1->eta()<<" charge: "<<itjet1->charge()<<endl;
-          //cout<<"   Jet 2 pt: "<<itjet2->pt()<<" pz: "<<itjet2->pz()<<" eta: "<<itjet2->eta()<<" charge: "<<itjet2->charge()<<"\n\n";
-          trackVec.clear();
-          trackVec.push_back(t_trkele);
-          for(size_t j1=0; j1<1; j1++){
-            auto trackjet1 = *(JetTrk1.at(j1));
-            if(trackjet1.quality(reco::Track::highPurity) && trackjet1.pt()>1){
-              auto t_trkjet1 = (* theB).build(trackjet1);
-              trackVec.push_back(t_trkjet1);
-              Jet1TrackPush=true;
+          //float EleJetDR=100;
+          //float DR1=deltaR(itjet1->eta(),itjet1->phi(),itElec1->eta(),itElec1->phi());
+          //float DR2=deltaR(itjet2->eta(),itjet2->phi(),itElec1->eta(),itElec1->phi());
+          //EleJetDR=min(DR1,DR2);
+          //EleJetDR=EleJetDR+1;
+          //float JetJetDR=deltaR(itjet1->eta(),itjet1->phi(),itjet2->eta(),itjet2->phi());
+          //JetJetDR=JetJetDR+1;
+          if(mass>80 && mass<160){
+            //cout<<"Electrons size: "<<myelectrons->size()<<endl;
+            //cout<<"   Jet 1 pt: "<<itjet1->pt()<<" pz: "<<itjet1->pz()<<" eta: "<<itjet1->eta()<<" charge: "<<itjet1->charge()<<endl;
+            //cout<<"   Jet 2 pt: "<<itjet2->pt()<<" pz: "<<itjet2->pz()<<" eta: "<<itjet2->eta()<<" charge: "<<itjet2->charge()<<"\n\n";
+            trackVec1.clear();
+            trackVec2.clear();
+            //trackVec.push_back(t_trkele);
+
+            for(size_t j1=0; j1<JetTrk1.size(); j1++){
+              auto trackjet1 = *(JetTrk1.at(j1));
+              if(trackjet1.quality(reco::Track::highPurity) && trackjet1.pt()>1){
+                auto t_trkjet1 = (* theB).build(trackjet1);
+                trackVec1.push_back(t_trkjet1);
+                //Jet1TrackPush=true;
+              }
             }
-          }
-          auto trackjet1 = *(JetTrk1.at(0));
-          if(trackjet1.quality(reco::Track::highPurity)){
-            auto t_trkjet1 = (* theB).build(trackjet1);
-            trackVec.push_back(t_trkjet1);
-            Jet1TrackPush=true;
-          }
-          for(size_t j2=0; j2<1; j2++){
-            auto trackjet2 = *(JetTrk2.at(j2));
-            if(trackjet2.quality(reco::Track::highPurity) && trackjet2.pt()>1){
-              auto t_trkjet2 = (* theB).build(trackjet2);
-              trackVec.push_back(t_trkjet2);
-              Jet2TrackPush=true;
+
+            for(size_t j2=0; j2<JetTrk2.size(); j2++){
+              auto trackjet2 = *(JetTrk2.at(j2));
+              if(trackjet2.quality(reco::Track::highPurity) && trackjet2.pt()>1){
+                auto t_trkjet2 = (* theB).build(trackjet2);
+                trackVec2.push_back(t_trkjet2);
+                //Jet2TrackPush=true;
+              }
             }
-          }
-          auto trackjet2 = *(JetTrk2.at(0));
-          if(trackjet2.quality(reco::Track::highPurity)){
-            auto t_trkjet2 = (* theB).build(trackjet2);
-            trackVec.push_back(t_trkjet2);
-            Jet2TrackPush=true;
-          }
-          JetCount++;
-          if(ElecTrackPush && Jet1TrackPush && Jet2TrackPush) {
-            TransientVertex myVertex = fitter.vertex(trackVec);
-            if(myVertex.isValid()){
-               myVertices.push_back(myVertex);
+
+            JetCount++;
+
+            if(trackVec1.size()>=1 && trackVec2.size()>=1 && trackele->pt()>1) {
+              vector<TransientTrack> TemptrackVec;
+              for (size_t trki = 0; trki < trackVec1.size(); trki++) {
+                for (size_t trkj = 0; trkj < trackVec2.size(); trkj++) {
+                  TemptrackVec.clear();
+                  TemptrackVec.push_back(t_trkele);
+                  TemptrackVec.push_back(trackVec1.at(0));
+                  TemptrackVec.push_back(trackVec2.at(0));
+                  //cout<<"Track container size: "<<TemptrackVec.size()<<" position: "<<EleCount<<" pt: "<<itElec1->pt()<<" trkpt: "<<trackele->pt()<<endl;
+                  if(TemptrackVec.size()>=2) {
+                    TransientVertex myVertex = fitter.vertex(TemptrackVec);
+                    TemptrackVec.clear();
+                    if(myVertex.isValid()){
+                       myVertices.push_back(myVertex);
+                    }
+                  }
+                }
+              }
+            }
+            //cout<<"\n\n\n Number of vertices before merging: "<<myVertices.size()<<"\n\n\n";
+            vector<TransientVertex> tmpVertices;//temporal vertices storage use for iterations
+            vector<TransientVertex> finalVertices;//Vertices Fully merged and filtered
+            vector<TransientTrack> Otrk1;//Original tracks stoage use for iterations
+            vector<TransientTrack> Otrk2;//Original tracks stoage use for iterations
+            vector<TransientTrack> Otrktmp;//Merged Original tracks storage use for Vertex fitting
+            vector<size_t> Vfound;//Storage for vertices that were already compared and similed
+            vector<size_t> Tfound;//Storage for tracks that were compared and similed
+            bool rSimil=true;//flag whenever a two similar tracks where found if not found any end merging
+            bool Vf=false;//refered to Vfound flag tells if the iterand vertex aws already compared
+            bool Similf=false;// refered to Tfound flag tells if the iterand track is repeated between two vertices. Avoid reapeting tracks in Otrktmp
+            size_t its=0;// counts number of iterations
+            size_t vertexcount=0;//counts number of merged vertices
+            finalVertices.clear();
+            while(rSimil && its<150){// lasso while stops whenever there are not vertices left to merge or reach the mx number of Iterations
+              /////Initialize storage and flags////
+              tmpVertices=myVertices;
+              myVertices.clear();
+              vertexcount=0;
+              rSimil=false;
+              Vfound.clear();
+              ///////////////////////////////////
+              its++;//count iterations
+              for(size_t x=0; x<tmpVertices.size(); x++){////iteration over the all vertices/////
+                //cout<<"1st it flag "<<x<<endl;
+                bool Vsimil=false;///// Flag tells if the vertex share tracks with another. guarantees only storing not mergeable vertices
+
+                //bool Vrepeat=false;
+                size_t repeatcount=0;//// Counter tells how many times a vertex is repeting in the storage. I.e. whenever two vertices have the same number of tracks and all are equal.
+                Vf=false;//initialize
+                Otrk1.clear();//initialize
+
+                for(size_t i=0; i<Vfound.size(); i++){if(Vfound.at(i)==x)Vf=true;}//omit comparing a vertex that was already merged
+
+                if(tmpVertices.at(x).normalisedChiSquared()<5 && !Vf){// quality check plus already merged vertex check
+                  Otrk1=tmpVertices.at(x).originalTracks();// extract original tracks from first compared vertex
+                  for(size_t y=x+1; y<tmpVertices.size(); y++){/// iteration over all vertices
+                    //cout<<" 2nd it Flag "<<y<<endl;
+                    size_t similcount=0;//initialize
+                    Tfound.clear();//Restart Found tracks
+
+                    Vf=false;//Restart alread merged flag
+                    Otrk2.clear();// restart track container
+
+                    for(size_t i=0; i<Vfound.size(); i++){if(Vfound.at(i)==y)Vf=true;}//tell if the current vertex was already compared and merged
+
+                    if(tmpVertices.at(y).normalisedChiSquared()<5 && !Vf){ //quality check plus already merged check
+                      Otrktmp.clear();//restart Temporal track Storage
+                      Otrk2=tmpVertices.at(y).originalTracks();//Extract original tracks from second compared vertex
+                      for(size_t z=0; z<Otrk1.size(); z++){// first track set iterations
+                        for(size_t v=0; v<Otrk2.size(); v++){// second track set iterations
+                          /////check if two vertices are close enough
+                          //float Sigma1=sqrt(tmpVertices.at(x).positionError().cxx()*tmpVertices.at(x).positionError().cxx()
+                          //                  +tmpVertices.at(x).positionError().cyy()*tmpVertices.at(x).positionError().cyy()
+                          //                  +tmpVertices.at(x).positionError().czz()*tmpVertices.at(x).positionError().czz());
+                          //float Sigma2=sqrt(tmpVertices.at(y).positionError().cxx()*tmpVertices.at(y).positionError().cxx()
+                          //                  +tmpVertices.at(y).positionError().cyy()*tmpVertices.at(y).positionError().cyy()
+                          //                  +tmpVertices.at(y).positionError().czz()*tmpVertices.at(y).positionError().czz());
+                          //Sigma1=min(Sigma1,Sigma2);
+                          //float dx,dy,dz, dist;
+                          //dx= tmpVertices.at(x).position().x()-tmpVertices.at(y).position().x();
+                          //dy= tmpVertices.at(x).position().y()-tmpVertices.at(y).position().y();
+                          //dz= tmpVertices.at(x).position().z()-tmpVertices.at(y).position().z();
+                          //dist= sqrt(dx*dx+dy*dy+dz*dz);
+
+                          if( deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())==0
+                             && Otrk1.at(z).track().pt()==Otrk2.at(v).track().pt()){// && dist<4*Sigma1){ //check whenever a track is shared in both sets
+                               //cout<<"X "<<x<<" Y "<<y<<" Z "<<z<<" V "<<v<<endl;
+                               //cout<<"  "<<deltaR(Otrk1.at(z).track().eta(),Otrk1.at(z).track().phi(),Otrk2.at(v).track().eta(),Otrk2.at(v).track().phi())
+                               //<<"  "<<Otrk1.at(z).track().pt()<<"  "<<Otrk2.at(v).track().pt()<<endl;
+                               similcount++;// count number of similar tracks from each set
+                               rSimil=true;// FLag there are mergeable vertices
+                               //breakSimil=true;
+                               Otrktmp=Otrk1;// store all track from first set
+                               Vfound.push_back(y);// store index of already compared and merged vertex
+                               Tfound.push_back(v);// store index of already compared and similar track
+                               Vsimil=true;//Flag the compared vertex is mergeable
+                               //break;
+                             }
+                        }
+                        //if(breakSimil) break;
+                      }
+                      if(similcount!=0){//check if two vertices share tracks
+                        for(size_t w=0; w<Otrk2.size(); w++){//iteration over second set of tracks
+                          Similf=false;//reset flag track is repeated
+                          for(size_t s=0; s<Tfound.size(); s++){if(w==Tfound.at(s)) Similf=true;}//checks flag if track is repeated
+                          if(!Similf) Otrktmp.push_back(Otrk2.at(w));// if track is not repeated store in temporal track storage
+                        }
+                      }
+                      //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
+                      ////poner aqui el Fitter
+                      //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
+                      //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
+                      if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size())repeatcount++;// if two or more vertex are identical count
+                      //if(similcount==Otrk1.size() && Otrk1.size()==Otrk2.size()){
+                      //  break;
+                      //}
+                      if(Otrktmp.size()>2 && repeatcount<2){//check if temporal track could be fitted check if the identical vertex where already merged
+                        //cout<<"Simil Tracks: "<<similcount<<" Otrk1 "<< Otrk1.size()<<" Otrk2 "<<Otrk2.size()<<endl;
+                        //cout<<" Temporal track size: "<<Otrktmp.size()<<" 1st vertex iterator index: "<<x<<" 2nd vertex iterator index: "<< y <<endl;
+                        TransientVertex myVertex = fitter.vertex(Otrktmp);//fiit vertex
+                        if(myVertex.isValid()){// sanity check
+                          vertexcount++;// count number of vertices
+                          myVertices.push_back(myVertex);//restore merged vertices
+                        }
+                      }
+                    }
+                  }
+                  if(!Vsimil && tmpVertices.at(x).normalisedChiSquared()<5) finalVertices.push_back(tmpVertices.at(x));// if track is not mergeable and is good store as final vertex
+                  //cout<<"Simil vertices: "<<similcount<<endl;
+                }
+              }
+            }
+            //cout<<" Valid vertex "<< vertexcount<<endl;
+            //cout<<"\n\n\n Number of vertices after merging: "<<myVertices.size()<<" Final vertices: "<<finalVertices.size()<<"\n\n\n";
+            //cout<<"\n\nNumber of secondary vertices: "<<myVertices.size()<<" Electron pt: "<<itElec1->pt()<<" N: "<<EleCount<<endl;
+            for(size_t x=0; x<finalVertices.size(); x++){
+              TransientVertex myV=finalVertices.at(x);
+              //cout<<"Vertex normChi2: "<<myV.normalisedChiSquared()<<" Number of tracks: "<<myV.originalTracks().size()<<endl;
+              if(myV.normalisedChiSquared()<5){
+                numEsecvec++;
+                //cout<<"Number of valid Secvec: "<<numEsecvec<<" N: "<<EleCount<<endl;
+                Esecvec_posx.push_back(myV.position().x());
+                Esecvec_posy.push_back(myV.position().y());
+                Esecvec_posz.push_back(myV.position().z());
+                Esecvec_poserrorx.push_back(myV.positionError().cxx());
+                Esecvec_poserrory.push_back(myV.positionError().cyy());
+                Esecvec_poserrorz.push_back(myV.positionError().czz());
+                Esecvec_chi2.push_back(myV.totalChiSquared());
+                Esecvec_nodf.push_back(myV.degreesOfFreedom());
+                Esecvec_normchi2.push_back(myV.normalisedChiSquared());
+                Esecvec_eleTag.push_back(EleCount);
+                Esecvec_px.push_back(itjet1->px()+itjet2->px()+itElec1->px());
+                Esecvec_py.push_back(itjet1->py()+itjet2->py()+itElec1->py());
+                Esecvec_pz.push_back(itjet1->pz()+itjet2->pz()+itElec1->pz());
+                Esecvec_jet_pt1.push_back(itjet1->pt());
+                Esecvec_jet_eta1.push_back(itjet1->eta());
+                Esecvec_jet_phi1.push_back(itjet1->phi());
+                Esecvec_jet_pt2.push_back(itjet2->pt());
+                Esecvec_jet_eta2.push_back(itjet2->eta());
+                Esecvec_jet_phi2.push_back(itjet2->phi());
+
+                math::XYZPoint sv= math::XYZPoint(myV.position().x(),myV.position().y(),myV.position().z());
+                reco::Track trackj1= *(JetTrk1.at(0));
+                auto d1 = sqrt(trackj1.dxy(sv)*trackj1.dxy(sv)+trackj1.dz(sv)*trackj1.dz(sv));
+                reco::Track trackj2= *(JetTrk2.at(0));
+                auto d2 = sqrt(trackj2.dxy(sv)*trackj2.dxy(sv)+trackj2.dz(sv)*trackj2.dz(sv));
+
+                Esecvec_jet_d1.push_back(d1);
+                Esecvec_jet_d2.push_back(d2);
+              }
             }
           }
         }
       }
-    }
-    //cout<<"Number of jet track per jet: "<<JetJetCount<<endl;
-  }
-  //cout<<"\n\nNumber of secondary vertices: "<<myVertices.size()<<" Electron pt: "<<itElec1->pt()<<" N: "<<EleCount<<endl;
-  for(size_t x=0; x<myVertices.size(); x++){
-    TransientVertex myV=myVertices.at(x);
-    //cout<<"Vertex normChi2: "<<myV.normalisedChiSquared()<<" Number of tracks: "<<myV.originalTracks().size()<<endl;
-    if(myV.normalisedChiSquared()<5){
-      numEsecvec++;
-      //cout<<"Number of valid Secvec: "<<numEsecvec<<" N: "<<EleCount<<endl;
-      Esecvec_posx.push_back(myV.position().x());
-      Esecvec_posy.push_back(myV.position().y());
-      Esecvec_posz.push_back(myV.position().z());
-      Esecvec_poserrorx.push_back(myV.positionError().cxx());
-      Esecvec_poserrory.push_back(myV.positionError().cyy());
-      Esecvec_poserrorz.push_back(myV.positionError().czz());
-      Esecvec_chi2.push_back(myV.totalChiSquared());
-      Esecvec_nodf.push_back(myV.degreesOfFreedom());
-      Esecvec_normchi2.push_back(myV.normalisedChiSquared());
-      Esecvec_eleTag.push_back(EleCount);
+      //cout<<"Number of jet track per jet: "<<JetJetCount<<endl;
     }
   }
 
+
   EleCount++;
   myVertices.clear();
-}/////este es el final de iterador de electrones Para metodo de merging hay qeu borrar*/
+}/////este es el final de iterador de electrones Para metodo de merging hay qeu borrar
 
 //////////////////////////////////////////Making secondary vertices with electron tracks///////////////////////////////
 ///////////////plan iterate all electron track with hq tracks to form vertices and then merge them all
