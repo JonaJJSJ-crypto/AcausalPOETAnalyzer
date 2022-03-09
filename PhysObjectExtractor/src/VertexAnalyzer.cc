@@ -137,6 +137,8 @@ VertexAnalyzer::VertexAnalyzer(const edm::ParameterSet& iConfig)
    mtree->GetBranch("Bsp_dydz")->SetTitle("vertex Beamspot position dydz (mm)");
    mtree->Branch("Bsp_widthx",&Bsp_widthx);
    mtree->GetBranch("Bsp_widthx")->SetTitle("vertex Beamspot width x (mm)");
+   mtree->Branch("Bsp_widthy",&Bsp_widthy);
+   mtree->GetBranch("Bsp_widthy")->SetTitle("vertex Beamspot width y (mm)");
 }
 
 
