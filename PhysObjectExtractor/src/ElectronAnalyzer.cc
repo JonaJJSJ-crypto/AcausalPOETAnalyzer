@@ -294,7 +294,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->GetBranch("electron_dxyError")->SetTitle("electron transverse impact parameter uncertainty (mm)");
   mtree->Branch("electron_dzError",&electron_dzError);
   mtree->GetBranch("electron_dzError")->SetTitle("electron longitudinal impact parameter uncertainty (mm)");
-  mtree->Branch("secvec_posx",&secvec_posx);
+  /*mtree->Branch("secvec_posx",&secvec_posx);
   mtree->GetBranch("secvec_posx")->SetTitle("secvec position x (mm)");
   mtree->Branch("secvec_posy",&secvec_posy);
   mtree->GetBranch("secvec_posy")->SetTitle("secvec position y (mm)");
@@ -343,7 +343,7 @@ ElectronAnalyzer::ElectronAnalyzer(const edm::ParameterSet& iConfig)
   mtree->Branch("secvec_jet_d2",&secvec_jet_d2);
   mtree->GetBranch("secvec_jet_d2")->SetTitle("secvec jet 2 impact parameter (mm)");
   mtree->Branch("secvec_jet_eleTag",&secvec_jet_eleTag);
-  mtree->GetBranch("secvec_jet_eleTag")->SetTitle("secvec jet electron Tag (mm)");
+  mtree->GetBranch("secvec_jet_eleTag")->SetTitle("secvec jet electron Tag (mm)");*/
 
   mtree->Branch("Esecvec_posx",&Esecvec_posx);
   mtree->GetBranch("Esecvec_posx")->SetTitle("secvec position x (mm)");
@@ -1190,7 +1190,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
 
             JetCount++;
 
-            if(trackVec1.size()>=1 && trackVec2.size()>=1 && trackele->pt()>1) {
+            if(trackVec1.size()>=2 && trackVec2.size()>=2 && trackele->pt()>1) {
               vector<TransientTrack> TemptrackVec;
               for (size_t trki = 0; trki < trackVec1.size(); trki++) {
                 for (size_t trkj = 0; trkj < trackVec2.size(); trkj++) {
@@ -1328,7 +1328,24 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
             for(size_t x=0; x<finalVertices.size(); x++){
               TransientVertex myV=finalVertices.at(x);
               //cout<<"Vertex normChi2: "<<myV.normalisedChiSquared()<<" Number of tracks: "<<myV.originalTracks().size()<<endl;
-              if(myV.normalisedChiSquared()<5){
+              bool DR4=true;
+              bool pt3=false;
+              size_t pt3count=0;
+              Otrk1=myV.originalTracks();
+              for(size_t u=0; u<Otrk1.size(); u++){
+                if(Otrk1.at(u).track().pt()>3) pt3count++;
+                for(size_t v=u+1; v<Otrk1.size(); v++){
+                  float eta1=Otrk1.at(u).track().eta();
+                  float eta2=Otrk1.at(v).track().eta();
+                  float phi1=Otrk1.at(u).track().phi();
+                  float phi2=Otrk1.at(v).track().phi();
+                  float DRtracks=deltaR(eta1,eta2,phi1,phi2);
+                  if( DRtracks>4 ) DR4=false;
+                }
+              }
+              if(pt3count<=3) pt3=true;
+              //cout<<"Number of valid Secvec: "<<numEsecvec<<" size: "<<Otrk1.size()<<" DR4: "<<DR4<<" pt3: "<<pt3<<endl;
+              if( myV.normalisedChiSquared()<5 && Otrk1.size()>=3 && DR4 && pt3 ){
                 numEsecvec++;
                 //cout<<"Number of valid Secvec: "<<numEsecvec<<" N: "<<EleCount<<endl;
                 Esecvec_posx.push_back(myV.position().x());
