@@ -1340,12 +1340,12 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
                   float phi1=Otrk1.at(u).track().phi();
                   float phi2=Otrk1.at(v).track().phi();
                   float DRtracks=deltaR(eta1,eta2,phi1,phi2);
-                  if( DRtracks<4 ) DR4=false;
+                  if( DRtracks<4 ) DR4=!DR4;
                 }
               }
-              if(pt3count<=3) pt3=true;
+              if(pt3count<=3) pt3=!pt3;
               //cout<<"Number of valid Secvec: "<<numEsecvec<<" size: "<<Otrk1.size()<<" DR4: "<<DR4<<" pt3: "<<pt3<<endl;
-              if( myV.normalisedChiSquared()<5 && Otrk1.size()>=3 && DR4 && pt3 ){
+              if( myV.normalisedChiSquared()<5 && Otrk1.size()>=3 ){
                 numEsecvec++;
                 //cout<<"Number of valid Secvec: "<<numEsecvec<<" N: "<<EleCount<<endl;
                 Esecvec_posx.push_back(myV.position().x());
