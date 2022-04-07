@@ -1190,7 +1190,8 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
 
             JetCount++;
 
-            if(trackVec1.size()>=2 && trackVec2.size()>=2 && trackele->pt()>1) {
+            //if(trackVec1.size()>=2 && trackVec2.size()>=2 && trackele->pt()>1) {
+            if(trackele->pt()>1){
               vector<TransientTrack> TemptrackVec;
               for (size_t trki = 0; trki < trackVec1.size(); trki++) {
                 for (size_t trkj = 0; trkj < trackVec2.size(); trkj++) {
