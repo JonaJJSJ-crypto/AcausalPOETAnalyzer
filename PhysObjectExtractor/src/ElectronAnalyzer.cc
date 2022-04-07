@@ -1340,7 +1340,7 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
                   float phi1=Otrk1.at(u).track().phi();
                   float phi2=Otrk1.at(v).track().phi();
                   float DRtracks=deltaR(eta1,eta2,phi1,phi2);
-                  if( DRtracks>4 ) DR4=false;
+                  if( DRtracks<4 ) DR4=false;
                 }
               }
               if(pt3count<=3) pt3=true;
