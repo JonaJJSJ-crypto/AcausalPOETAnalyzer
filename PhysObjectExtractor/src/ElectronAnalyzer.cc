@@ -1190,14 +1190,15 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
 
             JetCount++;
 
-            if(trackVec1.size()>=2 && trackVec2.size()>=2 && trackele->pt()>1) {
+            //if(trackVec1.size()>=2 && trackVec2.size()>=2 && trackele->pt()>1) {
+            if(trackele->pt()>1){
               vector<TransientTrack> TemptrackVec;
               for (size_t trki = 0; trki < trackVec1.size(); trki++) {
                 for (size_t trkj = 0; trkj < trackVec2.size(); trkj++) {
                   TemptrackVec.clear();
                   TemptrackVec.push_back(t_trkele);
-                  TemptrackVec.push_back(trackVec1.at(0));
-                  TemptrackVec.push_back(trackVec2.at(0));
+                  TemptrackVec.push_back(trackVec1.at(trki));
+                  TemptrackVec.push_back(trackVec2.at(trkj));
                   //cout<<"Track container size: "<<TemptrackVec.size()<<" position: "<<EleCount<<" pt: "<<itElec1->pt()<<" trkpt: "<<trackele->pt()<<endl;
                   if(TemptrackVec.size()>=2) {
                     TransientVertex myVertex = fitter.vertex(TemptrackVec);
@@ -1340,12 +1341,13 @@ for(GsfElectronCollection::const_iterator itElec1=myelectrons->begin(); itElec1!
                   float phi1=Otrk1.at(u).track().phi();
                   float phi2=Otrk1.at(v).track().phi();
                   float DRtracks=deltaR(eta1,eta2,phi1,phi2);
-                  if( DRtracks>4 ) DR4=false;
+                  if( DRtracks>4 ) DR4=!DR4;
                 }
               }
-              if(pt3count<=3) pt3=true;
+              if(pt3count>=3) pt3=true;
               //cout<<"Number of valid Secvec: "<<numEsecvec<<" size: "<<Otrk1.size()<<" DR4: "<<DR4<<" pt3: "<<pt3<<endl;
-              if( myV.normalisedChiSquared()<5 && Otrk1.size()>=3 && DR4 && pt3 ){
+              //if( myV.normalisedChiSquared()<5 && Otrk1.size()>=5 && pt3 && DR4 ){ //descomentar para DR4 selectiony cambiar DR4=!DR4; por DR4=false;
+              if( myV.normalisedChiSquared()<5 && Otrk1.size()>=5 && pt3 ){
                 numEsecvec++;
                 //cout<<"Number of valid Secvec: "<<numEsecvec<<" N: "<<EleCount<<endl;
                 Esecvec_posx.push_back(myV.position().x());
